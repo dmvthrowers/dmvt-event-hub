@@ -6,6 +6,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import { z } from "npm:zod@3.23.8";
 import { corsHeaders } from "../_shared/cors.ts";
 import { sendMail } from "../_shared/email-stub.ts";
+import { getSiteUrl } from "../_shared/site-url.ts";
 import { newToken } from "../_shared/tokens.ts";
 
 const Body = z.object({ token: z.string().min(16).max(128) });
