@@ -17,6 +17,9 @@ export type StubEmail = {
 };
 
 export async function sendMail(email: StubEmail): Promise<void> {
-  // For now, log so admins/devs can copy verification URLs from edge logs.
-  console.log("[email-stub] →", JSON.stringify(email, null, 2));
+  // SECURITY: Do NOT log the full email payload — `data` contains
+  // verification and manage URLs that embed secret tokens. Anyone with
+  // access to edge function logs would otherwise be able to publish or
+  // edit events. Log only non-sensitive metadata.
+  console.log("[email-stub] queued", { to: email.to, template: email.template });
 }
