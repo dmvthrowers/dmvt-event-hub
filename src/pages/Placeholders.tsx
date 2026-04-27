@@ -10,13 +10,6 @@ const Placeholder = ({ title, description }: { title: string; description: strin
   </SiteLayout>
 );
 
-export const EventsPage = () => (
-  <Placeholder
-    title="Events Explorer"
-    description="List, map, and calendar views are being built next. Check back shortly."
-  />
-);
-
 export const AboutPage = () => (
   <Placeholder
     title="About DMVT Events"
