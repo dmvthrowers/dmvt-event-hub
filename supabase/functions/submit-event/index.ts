@@ -132,10 +132,8 @@ Deno.serve(async (req) => {
     return json({ error: "token_failed" }, 500);
   }
 
-  const origin = req.headers.get("origin") || req.headers.get("referer")?.replace(/\/[^/]*$/, "") || "";
-  const verifyUrl = origin
-    ? `${origin}/verify?token=${verifyToken}`
-    : `/verify?token=${verifyToken}`;
+  const siteUrl = getSiteUrl();
+  const verifyUrl = `${siteUrl}/verify?token=${verifyToken}`;
 
   await sendMail({
     to: submitterEmail,
@@ -143,7 +141,7 @@ Deno.serve(async (req) => {
     data: {
       eventTitle: event.title,
       verifyUrl,
-      siteUrl: origin,
+      siteUrl,
     },
   });
 
