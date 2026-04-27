@@ -1,1 +1,10 @@
 project_id = "gjthxhfnyigvihywibca"
+
+[functions.submit-event]
+verify_jwt = false
+
+[functions.verify-event]
+verify_jwt = false
+
+[functions.manage-event]
+verify_jwt = false
