@@ -17,13 +17,6 @@ export const EventsPage = () => (
   />
 );
 
-export const SubmitPage = () => (
-  <Placeholder
-    title="Submit an Event"
-    description="The submission form (with email verification) is being built next."
-  />
-);
-
 export const AboutPage = () => (
   <Placeholder
     title="About DMVT Events"
