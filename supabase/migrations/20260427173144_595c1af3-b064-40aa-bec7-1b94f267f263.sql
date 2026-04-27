@@ -1,0 +1,1 @@
+REVOKE SELECT (submitter_email) ON public.events FROM anon, authenticated;
