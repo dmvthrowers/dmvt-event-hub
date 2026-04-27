@@ -72,10 +72,8 @@ Deno.serve(async (req) => {
     token: manageToken,
   });
 
-  const origin = req.headers.get("origin") || "";
-  const manageUrl = origin
-    ? `${origin}/manage?token=${manageToken}`
-    : `/manage?token=${manageToken}`;
+  const siteUrl = getSiteUrl();
+  const manageUrl = `${siteUrl}/manage?token=${manageToken}`;
 
   await sendMail({
     to: event.submitter_email,
@@ -83,7 +81,7 @@ Deno.serve(async (req) => {
     data: {
       eventTitle: event.title,
       manageUrl,
-      siteUrl: origin,
+      siteUrl,
     },
   });
 
