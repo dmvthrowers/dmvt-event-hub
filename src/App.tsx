@@ -4,7 +4,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "./pages/Home";
-import { EventsPage, AboutPage } from "./pages/Placeholders";
+import { AboutPage } from "./pages/Placeholders";
+import { EventsPage } from "./pages/Events";
+import { EventDetailPage } from "./pages/EventDetail";
 import { SubmitPage } from "./pages/SubmitEvent";
 import { SubmitThanksPage } from "./pages/SubmitThanks";
 import { VerifyPage } from "./pages/Verify";
@@ -22,6 +24,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/events" element={<EventsPage />} />
+          <Route path="/events/:slug" element={<EventDetailPage />} />
           <Route path="/submit" element={<SubmitPage />} />
           <Route path="/submit/thanks" element={<SubmitThanksPage />} />
           <Route path="/verify" element={<VerifyPage />} />
