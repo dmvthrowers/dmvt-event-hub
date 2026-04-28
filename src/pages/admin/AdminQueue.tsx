@@ -51,8 +51,10 @@ export const AdminQueuePage = () => {
   }, []);
 
   const updateStatus = async (id: string, status: "published" | "hidden") => {
-    const patch: Record<string, unknown> = { status };
-    if (status === "published") patch.published_at = new Date().toISOString();
+    const patch =
+      status === "published"
+        ? { status, published_at: new Date().toISOString() }
+        : { status };
     const { error } = await supabase.from("events").update(patch).eq("id", id);
     if (error) {
       toast.error(error.message);

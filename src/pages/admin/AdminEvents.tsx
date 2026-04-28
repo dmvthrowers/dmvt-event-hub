@@ -89,9 +89,11 @@ export const AdminEventsPage = () => {
     });
   }, [events, statusFilter, search]);
 
-  const setStatus = async (id: string, status: string) => {
-    const patch: Record<string, unknown> = { status };
-    if (status === "published") patch.published_at = new Date().toISOString();
+  const setStatus = async (id: string, status: "pending" | "published" | "hidden" | "expired") => {
+    const patch =
+      status === "published"
+        ? { status, published_at: new Date().toISOString() }
+        : { status };
     const { error } = await supabase.from("events").update(patch).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Updated");

@@ -39,7 +39,7 @@ export const AdminReportsPage = () => {
     void load();
   }, []);
 
-  const setReportStatus = async (id: string, status: string) => {
+  const setReportStatus = async (id: string, status: "open" | "resolved" | "dismissed") => {
     const { error } = await supabase.from("reports").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     setReports((rs) => rs.map((r) => (r.id === id ? { ...r, status } : r)));
