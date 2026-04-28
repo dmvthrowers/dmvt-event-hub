@@ -1,0 +1,145 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
+import { SiteLayout } from "@/components/layout/SiteLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuthState } from "@/lib/auth";
+import { toast } from "sonner";
+
+export const AdminLoginPage = () => {
+  const navigate = useNavigate();
+  const auth = useAuthState();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  // Redirect to dashboard once admin
+  useEffect(() => {
+    if (auth.status === "authenticated" && auth.isAdmin) {
+      navigate("/admin/dashboard", { replace: true });
+    }
+  }, [auth, navigate]);
+
+  const handlePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setBusy(false);
+    if (error) toast.error(error.message);
+  };
+
+  const handleGoogle = async () => {
+    setBusy(true);
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/admin",
+    });
+    if (result.error) {
+      setBusy(false);
+      toast.error("Google sign-in failed");
+    }
+  };
+
+  const handleBootstrap = async () => {
+    setBusy(true);
+    const { error } = await supabase.rpc("bootstrap_first_admin");
+    setBusy(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("You are now admin");
+      navigate("/admin/dashboard", { replace: true });
+    }
+  };
+
+  return (
+    <SiteLayout>
+      <section className="container-dmvt py-20">
+        <div className="mx-auto max-w-md border border-hairline bg-card p-8">
+          <h1 className="mb-2 font-display text-3xl font-black text-navy">Admin Sign In</h1>
+          <p className="mb-6 text-sm text-muted-foreground">
+            Restricted area. Existing admins only.
+          </p>
+
+          {auth.status === "authenticated" && !auth.isAdmin && (
+            <div className="mb-6 border border-hairline bg-cream-mid p-4 text-sm">
+              <p className="mb-3">
+                Signed in as <strong>{auth.session.user.email}</strong> but you are not an admin.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleBootstrap}
+                disabled={busy}
+              >
+                Claim admin (first-time setup)
+              </Button>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Only works if no admin exists yet.
+              </p>
+              <Button
+                type="button"
+                variant="ghost"
+                className="mt-2 w-full"
+                onClick={() => supabase.auth.signOut()}
+              >
+                Sign out
+              </Button>
+            </div>
+          )}
+
+          {auth.status !== "authenticated" && (
+            <>
+              <form onSubmit={handlePassword} className="space-y-4">
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={busy}>
+                  Sign in
+                </Button>
+              </form>
+
+              <div className="my-4 flex items-center gap-3">
+                <div className="h-px flex-1 bg-hairline" />
+                <span className="text-xs uppercase tracking-wider text-muted-foreground">or</span>
+                <div className="h-px flex-1 bg-hairline" />
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleGoogle}
+                disabled={busy}
+              >
+                Continue with Google
+              </Button>
+            </>
+          )}
+        </div>
+      </section>
+    </SiteLayout>
+  );
+};
+
+export default AdminLoginPage;
