@@ -11,6 +11,12 @@ import { SubmitPage } from "./pages/SubmitEvent";
 import { SubmitThanksPage } from "./pages/SubmitThanks";
 import { VerifyPage } from "./pages/Verify";
 import { ManagePage } from "./pages/Manage";
+import AdminLoginPage from "./pages/admin/AdminLogin";
+import AdminQueuePage from "./pages/admin/AdminQueue";
+import AdminEventsPage from "./pages/admin/AdminEvents";
+import AdminReportsPage from "./pages/admin/AdminReports";
+import AdminSubmittersPage from "./pages/admin/AdminSubmitters";
+import AdminStatsPage from "./pages/admin/AdminStats";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +36,12 @@ const App = () => (
           <Route path="/verify" element={<VerifyPage />} />
           <Route path="/manage" element={<ManagePage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/admin" element={<AdminLoginPage />} />
+          <Route path="/admin/dashboard" element={<AdminQueuePage />} />
+          <Route path="/admin/events" element={<AdminEventsPage />} />
+          <Route path="/admin/reports" element={<AdminReportsPage />} />
+          <Route path="/admin/submitters" element={<AdminSubmittersPage />} />
+          <Route path="/admin/stats" element={<AdminStatsPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
