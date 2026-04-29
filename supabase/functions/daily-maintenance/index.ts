@@ -38,10 +38,17 @@ interface EventRow {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  // Shared-secret auth
-  const expected = Deno.env.get("DAILY_MAINTENANCE_SECRET");
-  const got = req.headers.get("x-cron-secret");
-  if (!expected || got !== expected) {
+  // Shared-secret auth: accepts either a matching `x-cron-secret` header or
+  // a Bearer token equal to the project service-role key (used by pg_cron).
+  const expectedCron = Deno.env.get("DAILY_MAINTENANCE_SECRET");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const cronHeader = req.headers.get("x-cron-secret");
+  const auth = req.headers.get("authorization") ?? "";
+  const bearer = auth.toLowerCase().startsWith("bearer ") ? auth.slice(7).trim() : "";
+  const ok =
+    (expectedCron && cronHeader === expectedCron) ||
+    (serviceKey && bearer === serviceKey);
+  if (!ok) {
     return json({ error: "unauthorized" }, 401);
   }
 
