@@ -11,6 +11,7 @@ import { SubmitPage } from "./pages/SubmitEvent";
 import { SubmitThanksPage } from "./pages/SubmitThanks";
 import { VerifyPage } from "./pages/Verify";
 import { ManagePage } from "./pages/Manage";
+import { ReportEventPage } from "./pages/ReportEvent";
 import AdminLoginPage from "./pages/admin/AdminLogin";
 import AdminQueuePage from "./pages/admin/AdminQueue";
 import AdminEventsPage from "./pages/admin/AdminEvents";
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/submit/thanks" element={<SubmitThanksPage />} />
           <Route path="/verify" element={<VerifyPage />} />
           <Route path="/manage" element={<ManagePage />} />
+          <Route path="/report/:eventId" element={<ReportEventPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/admin" element={<AdminLoginPage />} />
           <Route path="/admin/dashboard" element={<AdminQueuePage />} />
