@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.manage-event]
 verify_jwt = false
+
+[functions.renew-event]
+verify_jwt = false
+
+[functions.daily-maintenance]
+verify_jwt = false

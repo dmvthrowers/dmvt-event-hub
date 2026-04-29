@@ -55,6 +55,7 @@ export type Database = {
           age_label: string | null
           age_min: number | null
           all_day: boolean
+          auto_hidden_at: string | null
           capacity: number | null
           city: string | null
           cost_amount: number | null
@@ -77,6 +78,7 @@ export type Database = {
           recurrence: Database["public"]["Enums"]["recurrence_kind"]
           recurrence_until: string | null
           region: string | null
+          renewal_reminder_sent_at: string | null
           skill_level: Database["public"]["Enums"]["skill_level"]
           slug: string
           start_date: string
@@ -95,6 +97,7 @@ export type Database = {
           age_label?: string | null
           age_min?: number | null
           all_day?: boolean
+          auto_hidden_at?: string | null
           capacity?: number | null
           city?: string | null
           cost_amount?: number | null
@@ -117,6 +120,7 @@ export type Database = {
           recurrence?: Database["public"]["Enums"]["recurrence_kind"]
           recurrence_until?: string | null
           region?: string | null
+          renewal_reminder_sent_at?: string | null
           skill_level?: Database["public"]["Enums"]["skill_level"]
           slug: string
           start_date: string
@@ -135,6 +139,7 @@ export type Database = {
           age_label?: string | null
           age_min?: number | null
           all_day?: boolean
+          auto_hidden_at?: string | null
           capacity?: number | null
           city?: string | null
           cost_amount?: number | null
@@ -157,6 +162,7 @@ export type Database = {
           recurrence?: Database["public"]["Enums"]["recurrence_kind"]
           recurrence_until?: string | null
           region?: string | null
+          renewal_reminder_sent_at?: string | null
           skill_level?: Database["public"]["Enums"]["skill_level"]
           slug?: string
           start_date?: string
@@ -225,6 +231,33 @@ export type Database = {
           email?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      renew_tokens: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          event_id: string
+          expires_at: string
+          id: string
+          token: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          event_id: string
+          expires_at?: string
+          id?: string
+          token: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          event_id?: string
+          expires_at?: string
+          id?: string
+          token?: string
         }
         Relationships: []
       }
