@@ -50,10 +50,11 @@ export const EventsPage = () => {
 
         <div className="mt-8">
           <FilterBar
-          filters={filters}
-          onChange={setFilters}
-          resultCount={filtered.length}
-        />
+            filters={filters}
+            onChange={setFilters}
+            resultCount={filtered.length}
+          />
+        </div>
 
         <Tabs
           value={view}
