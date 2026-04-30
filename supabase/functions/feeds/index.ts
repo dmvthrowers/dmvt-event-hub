@@ -176,14 +176,24 @@ async function loadEvents(filters: Filters): Promise<Row[]> {
   return [...grouped.values()];
 }
 
-function buildIcs(rows: Row[], siteUrl: string) {
+function filterSummary(filters: Filters): string {
+  const parts: string[] = [];
+  if (filters.types?.length) parts.push(filters.types.join("/"));
+  if (filters.regions?.length) parts.push(filters.regions.join("/"));
+  if (filters.cities?.length) parts.push(filters.cities.join("/"));
+  if (filters.freeOnly) parts.push("free");
+  return parts.length ? ` (${parts.join(" · ")})` : "";
+}
+
+function buildIcs(rows: Row[], siteUrl: string, filters: Filters) {
+  const summary = filterSummary(filters);
   const lines: string[] = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//YoYo Events//Community Calendar//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
-    "X-WR-CALNAME:YoYo Events",
+    `X-WR-CALNAME:YoYo Events${summary}`,
     "X-WR-CALDESC:Community-built calendar of yo-yo and skill toy events",
   ];
   const stamp = toIcsUtc(new Date());
@@ -272,7 +282,8 @@ Deno.serve(async (req) => {
       req.headers.get("origin") ||
       "https://events.dmvthrowers.club";
 
-    const rows = await loadEvents();
+    const filters = parseFilters(url);
+    const rows = await loadEvents(filters);
 
     if (isRss) {
       return new Response(buildRss(rows, siteUrl), {
@@ -284,7 +295,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(buildIcs(rows, siteUrl), {
+    return new Response(buildIcs(rows, siteUrl, filters), {
       headers: {
         ...corsHeaders,
         "Content-Type": "text/calendar; charset=utf-8",
