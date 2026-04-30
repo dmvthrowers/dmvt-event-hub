@@ -77,30 +77,79 @@ type Row = {
   }[];
 };
 
-async function loadEvents(): Promise<Row[]> {
+type Filters = {
+  types: string[] | null;     // ["workshop","meetup","contest"]
+  regions: string[] | null;   // case-insensitive match on events.region
+  cities: string[] | null;    // case-insensitive match on events.city
+  freeOnly: boolean;
+};
+
+function parseList(v: string | null): string[] | null {
+  if (!v) return null;
+  const arr = v
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return arr.length ? arr : null;
+}
+
+function parseFilters(url: URL): Filters {
+  return {
+    types: parseList(url.searchParams.get("types") || url.searchParams.get("type")),
+    regions: parseList(url.searchParams.get("regions") || url.searchParams.get("region")),
+    cities: parseList(url.searchParams.get("cities") || url.searchParams.get("city")),
+    freeOnly: ["1", "true", "yes"].includes(
+      (url.searchParams.get("free") || "").toLowerCase()
+    ),
+  };
+}
+
+async function loadEvents(filters: Filters): Promise<Row[]> {
   const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
   const nowIso = new Date().toISOString();
-  // Pull next 12 months of occurrences for published events
-  const { data, error } = await supabase
+
+  let q = supabase
     .from("event_occurrences")
     .select(
       `id, start_at, end_at, all_day, event_id,
-       events!inner ( id, title, slug, description, venue_name, address, city, region, info_url, type, status, published_at )`
+       events!inner ( id, title, slug, description, venue_name, address, city, region, info_url, type, status, published_at, is_free )`
     )
     .gte("start_at", nowIso)
     .lte(
       "start_at",
       new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
     )
+    .eq("events.status", "published")
     .order("start_at", { ascending: true })
-    .limit(500);
+    .limit(1000);
 
+  if (filters.types?.length) {
+    q = q.in("events.type", filters.types);
+  }
+  if (filters.freeOnly) {
+    q = q.eq("events.is_free", true);
+  }
+  // Postgrest `in` is case-sensitive, and city/region are user-entered
+  // free text — fetch then filter in-memory for those.
+
+  const { data, error } = await q;
   if (error) throw error;
+
+  const lc = (s: string | null | undefined) => (s ?? "").trim().toLowerCase();
+  const regionSet = filters.regions
+    ? new Set(filters.regions.map((s) => s.toLowerCase()))
+    : null;
+  const citySet = filters.cities
+    ? new Set(filters.cities.map((s) => s.toLowerCase()))
+    : null;
 
   const grouped = new Map<string, Row>();
   for (const r of data ?? []) {
     const e = (r as any).events;
     if (!e || e.status !== "published") continue;
+    if (regionSet && !regionSet.has(lc(e.region))) continue;
+    if (citySet && !citySet.has(lc(e.city))) continue;
+
     if (!grouped.has(e.id)) {
       grouped.set(e.id, {
         id: e.id,
