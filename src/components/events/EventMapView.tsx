@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Link } from "react-router-dom";
@@ -80,34 +81,38 @@ export const EventMapView = ({ rows }: Props) => {
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          subdomains="abcd"
+          maxZoom={19}
         />
-        {pins.map(({ row, count, next }) => (
-          <Marker
-            key={row.event.id}
-            position={[row.event.latitude!, row.event.longitude!]}
-            icon={makePinIcon(typeColor(row.event.type))}
-          >
-            <Popup>
-              <div className="space-y-1">
-                <p className="label-caps text-red">{EVENT_TYPE_LABEL[row.event.type]}</p>
-                <p className="font-display text-base text-navy">{row.event.title}</p>
-                <p className="text-xs text-muted-foreground">{formatOccurrenceWhen(next)}</p>
-                <p className="text-xs text-muted-foreground">{formatLocation(row.event)}</p>
-                {count > 1 && (
-                  <p className="text-xs text-muted-foreground">+{count - 1} more dates</p>
-                )}
-                <Link
-                  to={`/events/${row.event.slug}`}
-                  className="label-caps mt-1 inline-block text-red underline"
-                >
-                  View details →
-                </Link>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        <MarkerClusterGroup chunkedLoading maxClusterRadius={50}>
+          {pins.map(({ row, count, next }) => (
+            <Marker
+              key={row.event.id}
+              position={[row.event.latitude!, row.event.longitude!]}
+              icon={makePinIcon(typeColor(row.event.type))}
+            >
+              <Popup>
+                <div className="space-y-1">
+                  <p className="label-caps text-red">{EVENT_TYPE_LABEL[row.event.type]}</p>
+                  <p className="font-display text-base text-navy">{row.event.title}</p>
+                  <p className="text-xs text-muted-foreground">{formatOccurrenceWhen(next)}</p>
+                  <p className="text-xs text-muted-foreground">{formatLocation(row.event)}</p>
+                  {count > 1 && (
+                    <p className="text-xs text-muted-foreground">+{count - 1} more dates</p>
+                  )}
+                  <Link
+                    to={`/events/${row.event.slug}`}
+                    className="label-caps mt-1 inline-block text-red underline"
+                  >
+                    View details →
+                  </Link>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MarkerClusterGroup>
       </MapContainer>
       {pins.length === 0 && (
         <p className="mt-3 text-center text-xs text-muted-foreground">

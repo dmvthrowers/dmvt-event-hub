@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -33,11 +33,23 @@ export const FilterBar = ({ filters, onChange, resultCount }: FilterBarProps) =>
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
+            type="search"
             value={filters.search}
             onChange={(e) => onChange({ ...filters, search: e.target.value })}
             placeholder="Search events, venues, cities…"
-            className="pl-9"
+            aria-label="Search events"
+            className="pl-9 pr-9"
           />
+          {filters.search && (
+            <button
+              type="button"
+              onClick={() => onChange({ ...filters, search: "" })}
+              aria-label="Clear search"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-1 text-muted-foreground hover:text-navy focus:outline-none focus-visible:ring-2 focus-visible:ring-navy"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {ALL_TYPES.map((t) => {
@@ -72,8 +84,10 @@ export const FilterBar = ({ filters, onChange, resultCount }: FilterBarProps) =>
           </div>
         </div>
       </div>
-      <p className="mt-3 text-xs text-muted-foreground">
-        {resultCount} event{resultCount === 1 ? "" : "s"} matching your filters
+      <p className="mt-3 text-xs text-muted-foreground" aria-live="polite">
+        {resultCount === 0
+          ? "No events match your filters"
+          : `${resultCount} event${resultCount === 1 ? "" : "s"} matching your filters`}
       </p>
     </div>
   );
