@@ -14,7 +14,7 @@ export const SiteNav = () => {
   const location = useLocation();
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-hairline/60 bg-cream/95 backdrop-blur supports-[backdrop-filter]:bg-cream/80">
+    <nav aria-label="Primary" className="sticky top-0 z-40 border-b border-hairline/60 bg-cream/95 backdrop-blur supports-[backdrop-filter]:bg-cream/80">
       <div className="container-dmvt flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
           <span className="font-display text-xl font-black text-navy md:text-2xl">
@@ -52,7 +52,9 @@ export const SiteNav = () => {
         <button
           type="button"
           className="md:hidden p-2 text-navy"
-          aria-label="Toggle menu"
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          aria-controls="mobile-nav"
           onClick={() => setOpen((v) => !v)}
         >
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -61,7 +63,7 @@ export const SiteNav = () => {
 
       {/* Mobile drawer */}
       {open && (
-        <div className="border-t border-hairline/60 bg-cream md:hidden">
+        <div id="mobile-nav" className="border-t border-hairline/60 bg-cream md:hidden">
           <div className="container-dmvt flex flex-col gap-4 py-4">
             {navItems.map((item) => (
               <RRNavLink
@@ -86,7 +88,7 @@ export const SiteNav = () => {
             >
               ☕ Donate
             </a>
-            <span className="text-xs text-muted-foreground">{location.pathname}</span>
+            
           </div>
         </div>
       )}
