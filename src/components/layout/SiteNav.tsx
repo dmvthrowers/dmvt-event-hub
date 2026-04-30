@@ -18,7 +18,7 @@ export const SiteNav = () => {
       <div className="container-dmvt flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
           <span className="font-display text-xl font-black text-navy md:text-2xl">
-            DMVT <span className="text-red">Events</span>
+            YoYo <span className="text-red">Events</span>
           </span>
         </Link>
 

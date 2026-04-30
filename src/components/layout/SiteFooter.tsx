@@ -7,14 +7,15 @@ export const SiteFooter = () => {
       <div className="container-dmvt grid gap-10 py-14 md:grid-cols-4">
         <div className="md:col-span-2">
           <p className="font-display text-3xl font-black">
-            DMVT <span className="text-red">Events</span>
+            YoYo <span className="text-red">Events</span>
           </p>
           <p className="mt-3 max-w-md text-sm text-cream/80">
-            A free, community-built calendar for yo-yo workshops, club meetups,
-            and contests. Anyone can submit an event. Find your crew, throw together.
+            A community-built calendar for yo-yo, kendama, and skill toy
+            events. Workshops, club meetups, and contests — anyone can submit
+            one. Find your people, throw together.
           </p>
           <p className="mt-4 text-xs text-cream/60">
-            Part of the DMV Throwers ecosystem · Est. 2021 · DC / MD / VA
+            A DMV Throwers project · Built for throwers everywhere
           </p>
         </div>
 
