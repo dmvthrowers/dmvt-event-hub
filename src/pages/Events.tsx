@@ -7,6 +7,7 @@ import { FilterBar } from "@/components/events/FilterBar";
 import { EventListView } from "@/components/events/EventListView";
 import { EventMapView } from "@/components/events/EventMapView";
 import { EventCalendarView } from "@/components/events/EventCalendarView";
+import { SubscribeFeeds } from "@/components/events/SubscribeFeeds";
 import {
   DEFAULT_FILTERS,
   applyFilters,
@@ -45,7 +46,10 @@ export const EventsPage = () => {
       </section>
 
       <section className="container-dmvt py-8 md:py-10">
-        <FilterBar
+        <SubscribeFeeds />
+
+        <div className="mt-8">
+          <FilterBar
           filters={filters}
           onChange={setFilters}
           resultCount={filtered.length}
