@@ -17,15 +17,16 @@ const Home = () => {
           }}
         />
         <div className="container-dmvt relative section-pad text-center">
-          <p className="label-caps text-red">Workshops · Meetups · Contests</p>
+          <p className="label-caps text-red">Yo-Yos · Kendama · Skill Toys</p>
           <h1 className="mx-auto mt-6 max-w-3xl text-5xl leading-[1.05] md:text-7xl">
-            Find Your Crew.
+            Find Your People.
             <br />
             <span className="text-red">Throw Together.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-base text-cream/80 md:text-lg">
-            A community-built calendar of yo-yo and skill toy events. Anyone can
-            add one. See what's happening near you on a list, map, or calendar.
+            A community calendar for yo-yo and skill toy events. Workshops,
+            meetups, contests — anyone can add one. Browse on a list, map, or
+            calendar, and subscribe in your favorite calendar app.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -135,12 +136,12 @@ const Home = () => {
               <Plus className="h-4 w-4" /> Submit an Event
             </Link>
             <a
-              href="https://dmvthrowers.club/"
+              href="https://map.dmvthrowers.club/"
               target="_blank"
               rel="noopener noreferrer"
               className="label-caps inline-flex items-center gap-2 border-2 border-cream px-6 py-3 text-cream hover:bg-cream hover:text-navy"
             >
-              Visit DMV Throwers <ArrowUpRight className="h-4 w-4" />
+              Explore the YoYo Map <ArrowUpRight className="h-4 w-4" />
             </a>
           </div>
         </div>
