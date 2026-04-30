@@ -88,7 +88,7 @@ export const SiteNav = () => {
             >
               ☕ Donate
             </a>
-            <span className="text-xs text-muted-foreground">{location.pathname}</span>
+            
           </div>
         </div>
       )}
