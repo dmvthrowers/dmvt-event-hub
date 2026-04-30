@@ -1,33 +1,85 @@
-import { useMemo, useState } from "react";
-import { Calendar, Copy, Download, Rss, Check, Apple } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Calendar,
+  Copy,
+  Download,
+  Rss,
+  Check,
+  Apple,
+  Filter,
+  X,
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { EVENT_TYPE_LABEL, type EventType } from "@/lib/events";
 
 /**
- * Subscribe-to-calendar block.
+ * Subscribe-to-calendar block with category + location filters.
  *
- * Builds public feed URLs from the Supabase project ref and exposes:
- *   - webcal:// link (one-tap subscribe in Apple Calendar / iOS / Outlook)
- *   - https:// link (Google Calendar "from URL")
- *   - .ics download
- *   - RSS feed
- *
- * The feed updates automatically as new events are published — users
- * subscribe once and their calendar stays in sync.
+ * Filters are encoded into the feed URL as query params (types, regions,
+ * cities, free), so the same calendar subscription stays scoped to what
+ * the user picked here.
  */
 export const SubscribeFeeds = () => {
   const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID as string;
 
+  const [types, setTypes] = useState<Set<EventType>>(
+    new Set(["workshop", "meetup", "contest"])
+  );
+  const [regions, setRegions] = useState<Set<string>>(new Set());
+  const [cities, setCities] = useState<Set<string>>(new Set());
+  const [freeOnly, setFreeOnly] = useState(false);
+
+  // Available regions/cities from currently-published events
+  const [allRegions, setAllRegions] = useState<string[]>([]);
+  const [allCities, setAllCities] = useState<string[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("events")
+        .select("region, city")
+        .eq("status", "published")
+        .limit(1000);
+      if (cancelled || !data) return;
+      const r = new Set<string>();
+      const c = new Set<string>();
+      for (const row of data) {
+        if (row.region) r.add(row.region.trim());
+        if (row.city) c.add(row.city.trim());
+      }
+      setAllRegions([...r].sort());
+      setAllCities([...c].sort());
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const { httpsUrl, webcalUrl, rssUrl } = useMemo(() => {
     const base = `https://${projectRef}.functions.supabase.co/feeds`;
+    const params = new URLSearchParams();
     const site =
       typeof window !== "undefined" ? window.location.origin : "";
-    const siteParam = site ? `?site=${encodeURIComponent(site)}` : "";
-    const rssSep = siteParam ? "&" : "?";
-    return {
-      httpsUrl: `${base}${siteParam}`,
-      webcalUrl: `webcal://${projectRef}.functions.supabase.co/feeds${siteParam}`,
-      rssUrl: `${base}${siteParam}${rssSep}format=rss`,
-    };
-  }, [projectRef]);
+    if (site) params.set("site", site);
+
+    if (types.size > 0 && types.size < 3) {
+      params.set("types", [...types].join(","));
+    }
+    if (regions.size > 0) params.set("regions", [...regions].join(","));
+    if (cities.size > 0) params.set("cities", [...cities].join(","));
+    if (freeOnly) params.set("free", "1");
+
+    const qs = params.toString();
+    const httpsUrl = `${base}${qs ? `?${qs}` : ""}`;
+    const webcalUrl = `webcal://${projectRef}.functions.supabase.co/feeds${
+      qs ? `?${qs}` : ""
+    }`;
+    const rssParams = new URLSearchParams(params);
+    rssParams.set("format", "rss");
+    const rssUrl = `${base}?${rssParams.toString()}`;
+    return { httpsUrl, webcalUrl, rssUrl };
+  }, [projectRef, types, regions, cities, freeOnly]);
 
   const [copied, setCopied] = useState<string | null>(null);
   const copy = async (label: string, value: string) => {
@@ -44,6 +96,25 @@ export const SubscribeFeeds = () => {
     httpsUrl
   )}`;
 
+  const toggle = <T,>(set: Set<T>, value: T, setter: (s: Set<T>) => void) => {
+    const next = new Set(set);
+    next.has(value) ? next.delete(value) : next.add(value);
+    setter(next);
+  };
+
+  const clearAll = () => {
+    setTypes(new Set(["workshop", "meetup", "contest"]));
+    setRegions(new Set());
+    setCities(new Set());
+    setFreeOnly(false);
+  };
+
+  const filterCount =
+    (types.size < 3 ? 1 : 0) +
+    (regions.size > 0 ? 1 : 0) +
+    (cities.size > 0 ? 1 : 0) +
+    (freeOnly ? 1 : 0);
+
   return (
     <div className="border border-hairline/70 bg-cream-mid">
       <div className="grid gap-6 p-6 md:grid-cols-[auto_1fr_auto] md:items-center md:p-8">
@@ -57,8 +128,9 @@ export const SubscribeFeeds = () => {
             Subscribe to the calendar
           </h2>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            Add every event to your calendar app once — new events show up
-            automatically as they're posted. No accounts, no spam.
+            Add the events you care about to your calendar app once — new ones
+            show up automatically. Pick categories and locations below to scope
+            your subscription.
           </p>
         </div>
 
@@ -80,6 +152,85 @@ export const SubscribeFeeds = () => {
         </div>
       </div>
 
+      {/* Filters */}
+      <div className="border-t border-hairline/70 bg-cream p-6 md:p-8">
+        <div className="flex items-center justify-between">
+          <p className="label-caps inline-flex items-center gap-2 text-navy">
+            <Filter className="h-3.5 w-3.5 text-red" /> Scope this feed
+            {filterCount > 0 && (
+              <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center bg-red px-1.5 text-[10px] text-cream">
+                {filterCount}
+              </span>
+            )}
+          </p>
+          {filterCount > 0 && (
+            <button
+              type="button"
+              onClick={clearAll}
+              className="label-caps inline-flex items-center gap-1 text-muted-foreground hover:text-red"
+            >
+              <X className="h-3 w-3" /> Reset
+            </button>
+          )}
+        </div>
+
+        <div className="mt-5 grid gap-6 md:grid-cols-3">
+          {/* Types */}
+          <div>
+            <p className="label-caps mb-2 text-muted-foreground">Categories</p>
+            <div className="flex flex-wrap gap-2">
+              {(Object.keys(EVENT_TYPE_LABEL) as EventType[]).map((t) => {
+                const active = types.has(t);
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => toggle(types, t, setTypes)}
+                    className={
+                      "label-caps border px-3 py-1.5 transition-colors " +
+                      (active
+                        ? "border-red bg-red text-cream"
+                        : "border-hairline bg-cream text-navy hover:border-red")
+                    }
+                    aria-pressed={active}
+                  >
+                    {EVENT_TYPE_LABEL[t]}
+                  </button>
+                );
+              })}
+            </div>
+            <label className="mt-4 flex items-center gap-2 text-sm text-navy">
+              <input
+                type="checkbox"
+                checked={freeOnly}
+                onChange={(e) => setFreeOnly(e.target.checked)}
+                className="h-4 w-4 accent-[hsl(var(--red))]"
+              />
+              Free events only
+            </label>
+          </div>
+
+          {/* Regions */}
+          <ChipGroup
+            label="Regions / states"
+            empty="No regions yet"
+            options={allRegions}
+            selected={regions}
+            onToggle={(v) => toggle(regions, v, setRegions)}
+          />
+
+          {/* Cities */}
+          <ChipGroup
+            label="Cities"
+            empty="No cities yet"
+            options={allCities}
+            selected={cities}
+            onToggle={(v) => toggle(cities, v, setCities)}
+          />
+        </div>
+      </div>
+
+      {/* URLs */}
       <div className="grid gap-px border-t border-hairline/70 bg-hairline/40 md:grid-cols-3">
         <FeedRow
           label="Subscribe URL"
@@ -91,7 +242,7 @@ export const SubscribeFeeds = () => {
         />
         <FeedRow
           label="Download .ics"
-          hint="One-time export of all upcoming events"
+          hint="One-time export of matching events"
           value={httpsUrl}
           copied={copied === "dl"}
           onCopy={() => copy("dl", httpsUrl)}
@@ -110,6 +261,54 @@ export const SubscribeFeeds = () => {
     </div>
   );
 };
+
+const ChipGroup = ({
+  label,
+  empty,
+  options,
+  selected,
+  onToggle,
+}: {
+  label: string;
+  empty: string;
+  options: string[];
+  selected: Set<string>;
+  onToggle: (v: string) => void;
+}) => (
+  <div>
+    <p className="label-caps mb-2 text-muted-foreground">{label}</p>
+    {options.length === 0 ? (
+      <p className="text-xs text-muted-foreground">{empty}</p>
+    ) : (
+      <div className="flex max-h-32 flex-wrap gap-1.5 overflow-y-auto">
+        {options.map((o) => {
+          const active = selected.has(o);
+          return (
+            <button
+              key={o}
+              type="button"
+              onClick={() => onToggle(o)}
+              className={
+                "border px-2.5 py-1 text-xs transition-colors " +
+                (active
+                  ? "border-navy bg-navy text-cream"
+                  : "border-hairline bg-cream text-navy hover:border-navy")
+              }
+              aria-pressed={active}
+            >
+              {o}
+            </button>
+          );
+        })}
+      </div>
+    )}
+    {selected.size === 0 && options.length > 0 && (
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        Leave empty to include all
+      </p>
+    )}
+  </div>
+);
 
 const FeedRow = ({
   label,
