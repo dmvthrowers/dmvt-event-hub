@@ -17,3 +17,9 @@ verify_jwt = false
 
 [functions.feeds]
 verify_jwt = false
+
+[functions.feed-subscribe]
+verify_jwt = false
+
+[functions.manage-feed-subscription]
+verify_jwt = false

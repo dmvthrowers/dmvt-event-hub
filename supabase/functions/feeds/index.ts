@@ -282,7 +282,45 @@ Deno.serve(async (req) => {
       req.headers.get("origin") ||
       "https://events.dmvthrowers.club";
 
-    const filters = parseFilters(url);
+    let filters = parseFilters(url);
+    const subToken = url.searchParams.get("token");
+    if (subToken) {
+      const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+      const { data: sub } = await supabase
+        .from("feed_subscriptions")
+        .select(
+          "filter_types, filter_regions, filter_cities, filter_free_only, revoked_at"
+        )
+        .eq("token", subToken)
+        .maybeSingle();
+      if (!sub) {
+        return new Response("Subscription not found", {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "text/plain" },
+        });
+      }
+      if (sub.revoked_at) {
+        return new Response(
+          "This subscription has been revoked. Visit /feeds/manage to create a new one.",
+          {
+            status: 410,
+            headers: { ...corsHeaders, "Content-Type": "text/plain" },
+          }
+        );
+      }
+      filters = {
+        types: (sub.filter_types as string[] | null) ?? null,
+        regions: (sub.filter_regions as string[] | null) ?? null,
+        cities: (sub.filter_cities as string[] | null) ?? null,
+        freeOnly: !!sub.filter_free_only,
+      };
+      // Best-effort access timestamp; don't await to keep response fast.
+      supabase
+        .from("feed_subscriptions")
+        .update({ last_accessed_at: new Date().toISOString() })
+        .eq("token", subToken)
+        .then(() => {});
+    }
     const rows = await loadEvents(filters);
 
     if (isRss) {
