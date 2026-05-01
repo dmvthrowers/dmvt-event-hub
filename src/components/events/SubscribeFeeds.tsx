@@ -8,7 +8,11 @@ import {
   Apple,
   Filter,
   X,
+  Mail,
+  Link2,
+  ShieldOff,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { EVENT_TYPE_LABEL, type EventType } from "@/lib/events";
 
