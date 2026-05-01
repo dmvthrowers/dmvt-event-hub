@@ -178,6 +178,78 @@ export type Database = {
         }
         Relationships: []
       }
+      feed_manage_tokens: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          token: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          token: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          token?: string
+        }
+        Relationships: []
+      }
+      feed_subscriptions: {
+        Row: {
+          created_at: string
+          email: string
+          filter_cities: string[] | null
+          filter_free_only: boolean
+          filter_regions: string[] | null
+          filter_types: string[] | null
+          id: string
+          label: string | null
+          last_accessed_at: string | null
+          revoked_at: string | null
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          filter_cities?: string[] | null
+          filter_free_only?: boolean
+          filter_regions?: string[] | null
+          filter_types?: string[] | null
+          id?: string
+          label?: string | null
+          last_accessed_at?: string | null
+          revoked_at?: string | null
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          filter_cities?: string[] | null
+          filter_free_only?: boolean
+          filter_regions?: string[] | null
+          filter_types?: string[] | null
+          id?: string
+          label?: string | null
+          last_accessed_at?: string | null
+          revoked_at?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       manage_tokens: {
         Row: {
           created_at: string
