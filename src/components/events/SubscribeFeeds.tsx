@@ -262,6 +262,175 @@ export const SubscribeFeeds = () => {
           icon={<Rss className="h-4 w-4" />}
         />
       </div>
+
+      {/* Personal link + unsubscribe notice */}
+      <PersonalLinkBlock
+        types={types}
+        regions={regions}
+        cities={cities}
+        freeOnly={freeOnly}
+      />
+    </div>
+  );
+};
+
+const PersonalLinkBlock = ({
+  types,
+  regions,
+  cities,
+  freeOnly,
+}: {
+  types: Set<EventType>;
+  regions: Set<string>;
+  cities: Set<string>;
+  freeOnly: boolean;
+}) => {
+  const [email, setEmail] = useState("");
+  const [label, setLabel] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{
+    ics_url: string;
+    webcal_url: string;
+    rss_url: string;
+    manage_url: string;
+  } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const create = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const { data, error } = await supabase.functions.invoke("feed-subscribe", {
+      body: {
+        email,
+        label: label || null,
+        filter_types: types.size < 3 ? [...types] : null,
+        filter_regions: regions.size > 0 ? [...regions] : null,
+        filter_cities: cities.size > 0 ? [...cities] : null,
+        filter_free_only: freeOnly,
+      },
+    });
+    setLoading(false);
+    if (error || (data as any)?.error) {
+      setError((data as any)?.error || "Could not create link");
+      return;
+    }
+    setResult(data as any);
+  };
+
+  const copy = async (label: string, value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(label);
+      setTimeout(() => setCopied(null), 1800);
+    } catch {
+      /* clipboard unavailable */
+    }
+  };
+
+  return (
+    <div className="border-t border-hairline/70 bg-cream-mid p-6 md:p-8">
+      <div className="grid gap-6 md:grid-cols-2">
+        <div>
+          <p className="label-caps text-red">Personal subscription link</p>
+          <h3 className="mt-1 font-display text-xl text-navy">
+            Get a revocable link by email
+          </h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Tied to your email so you can revoke it later if you switch
+            calendar apps or want to stop syncing. The link itself is the only
+            secret — anyone with it gets the same scoped events.
+          </p>
+
+          {!result ? (
+            <form onSubmit={create} className="mt-4 flex flex-col gap-3">
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="border border-hairline bg-cream px-3 py-2 text-navy outline-none focus:border-red"
+              />
+              <input
+                type="text"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                placeholder="Label (optional, e.g. Work laptop)"
+                maxLength={120}
+                className="border border-hairline bg-cream px-3 py-2 text-navy outline-none focus:border-red"
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="label-caps inline-flex items-center justify-center gap-2 bg-navy px-4 py-2.5 text-cream hover:bg-navy/90 disabled:opacity-60"
+              >
+                <Link2 className="h-4 w-4" />
+                {loading ? "Creating…" : "Create my link"}
+              </button>
+              {error && <p className="text-sm text-red">{error}</p>}
+            </form>
+          ) : (
+            <div className="mt-4 space-y-2">
+              <p className="text-sm text-navy">
+                <Check className="mr-1 inline h-4 w-4 text-red" /> Link created
+                — save the manage URL somewhere safe.
+              </p>
+              <button
+                onClick={() => copy("personal-ics", result.webcal_url)}
+                className="label-caps flex w-full items-center justify-between border border-hairline/70 bg-cream px-3 py-2 text-left text-xs text-navy hover:border-red"
+              >
+                <span className="truncate">{result.webcal_url}</span>
+                <span className="ml-2 shrink-0 text-red">
+                  {copied === "personal-ics" ? "Copied" : "Copy webcal"}
+                </span>
+              </button>
+              <button
+                onClick={() => copy("personal-manage", result.manage_url)}
+                className="label-caps flex w-full items-center justify-between border border-hairline/70 bg-cream px-3 py-2 text-left text-xs text-navy hover:border-red"
+              >
+                <span className="truncate">{result.manage_url}</span>
+                <span className="ml-2 shrink-0 text-red">
+                  {copied === "personal-manage" ? "Copied" : "Copy manage URL"}
+                </span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="border border-hairline/70 bg-cream p-5">
+          <p className="label-caps inline-flex items-center gap-1.5 text-navy">
+            <ShieldOff className="h-3.5 w-3.5 text-red" /> How to unsubscribe
+          </p>
+          <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+            <li>
+              <strong className="text-navy">In your calendar app:</strong>{" "}
+              right-click the calendar in the sidebar (Apple Calendar, Google
+              Calendar, Outlook) and choose <em>Delete</em> or{" "}
+              <em>Unsubscribe</em>. The events vanish on next sync.
+            </li>
+            <li>
+              <strong className="text-navy">Public feed URL:</strong> nothing
+              to revoke — just remove it from your calendar app. We don't know
+              who's subscribed.
+            </li>
+            <li>
+              <strong className="text-navy">Personal link:</strong> open{" "}
+              <Link to="/feeds/manage" className="text-red underline">
+                /feeds/manage
+              </Link>{" "}
+              to revoke server-side. The next sync will return an empty feed.
+            </li>
+          </ul>
+          <Link
+            to="/feeds/manage"
+            className="label-caps mt-4 inline-flex items-center gap-1.5 border border-navy px-3 py-2 text-navy hover:bg-navy hover:text-cream"
+          >
+            <Mail className="h-3.5 w-3.5" /> Manage my subscriptions
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };
