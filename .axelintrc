@@ -1,0 +1,6 @@
+# Axe-linter configuration for DMVEvents
+# Suppress aria-valid-attr-value false positives on dynamic JSX expressions.
+# Toggle buttons use aria-pressed={boolExpr} which is semantically correct but
+# cannot be validated statically by the axe-linter extension.
+rules:
+  aria-valid-attr-value: off

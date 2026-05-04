@@ -196,7 +196,7 @@ export const SubscribeFeeds = () => {
                         ? "border-red bg-red text-cream"
                         : "border-hairline bg-cream text-navy hover:border-red")
                     }
-                    aria-pressed={active}
+                    aria-pressed={active ? "true" : "false"}
                   >
                     {EVENT_TYPE_LABEL[t]}
                   </button>
@@ -467,7 +467,7 @@ const ChipGroup = ({
                   ? "border-navy bg-navy text-cream"
                   : "border-hairline bg-cream text-navy hover:border-navy")
               }
-              aria-pressed={active}
+              aria-pressed={active ? "true" : "false"}
             >
               {o}
             </button>
