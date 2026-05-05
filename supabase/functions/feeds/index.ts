@@ -6,7 +6,13 @@
 //   GET /feeds.ics        -> ICS
 //   GET /feeds.rss        -> RSS
 //
-// No auth required. Caches for 10 minutes.
+// Aggressively cached:
+//   - Strong ETag + Last-Modified derived from MAX(events.updated_at) over
+//     the rows that match this request's filters. When events change the
+//     ETag changes automatically; otherwise clients get a cheap 304.
+//   - Cache-Control allows shared caches (CDN, calendar clients) to reuse
+//     responses, with stale-while-revalidate so a stale copy can be served
+//     while we revalidate in the background.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -16,8 +22,14 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, if-none-match, if-modified-since",
+  "Access-Control-Expose-Headers": "ETag, Last-Modified, Cache-Control",
 };
+
+const PUBLIC_CACHE_CONTROL =
+  "public, max-age=300, s-maxage=300, stale-while-revalidate=86400";
+const PRIVATE_CACHE_CONTROL =
+  "private, max-age=300, stale-while-revalidate=86400";
 
 function pad(n: number) {
   return n.toString().padStart(2, "0");
@@ -57,6 +69,18 @@ function escXml(s: string) {
     .replace(/'/g, "&apos;");
 }
 
+// FNV-1a 64-bit -> hex. Stable, fast, no crypto needed for an ETag.
+function hashString(input: string): string {
+  let h = 0xcbf29ce484222325n;
+  const prime = 0x100000001b3n;
+  const mask = 0xffffffffffffffffn;
+  for (let i = 0; i < input.length; i++) {
+    h ^= BigInt(input.charCodeAt(i));
+    h = (h * prime) & mask;
+  }
+  return h.toString(16).padStart(16, "0");
+}
+
 type Row = {
   id: string;
   title: string;
@@ -69,6 +93,7 @@ type Row = {
   info_url: string | null;
   type: string;
   published_at: string | null;
+  updated_at: string | null;
   occurrences: {
     id: string;
     start_at: string;
@@ -78,9 +103,9 @@ type Row = {
 };
 
 type Filters = {
-  types: string[] | null;     // ["workshop","meetup","contest"]
-  regions: string[] | null;   // case-insensitive match on events.region
-  cities: string[] | null;    // case-insensitive match on events.city
+  types: string[] | null;
+  regions: string[] | null;
+  cities: string[] | null;
   freeOnly: boolean;
 };
 
@@ -112,7 +137,7 @@ async function loadEvents(filters: Filters): Promise<Row[]> {
     .from("event_occurrences")
     .select(
       `id, start_at, end_at, all_day, event_id,
-       events!inner ( id, title, slug, description, venue_name, address, city, region, info_url, type, status, published_at, is_free )`
+       events!inner ( id, title, slug, description, venue_name, address, city, region, info_url, type, status, published_at, updated_at, is_free )`
     )
     .gte("start_at", nowIso)
     .lte(
@@ -123,14 +148,8 @@ async function loadEvents(filters: Filters): Promise<Row[]> {
     .order("start_at", { ascending: true })
     .limit(1000);
 
-  if (filters.types?.length) {
-    q = q.in("events.type", filters.types);
-  }
-  if (filters.freeOnly) {
-    q = q.eq("events.is_free", true);
-  }
-  // Postgrest `in` is case-sensitive, and city/region are user-entered
-  // free text — fetch then filter in-memory for those.
+  if (filters.types?.length) q = q.in("events.type", filters.types);
+  if (filters.freeOnly) q = q.eq("events.is_free", true);
 
   const { data, error } = await q;
   if (error) throw error;
@@ -163,6 +182,7 @@ async function loadEvents(filters: Filters): Promise<Row[]> {
         info_url: e.info_url,
         type: e.type,
         published_at: e.published_at,
+        updated_at: e.updated_at,
         occurrences: [],
       });
     }
@@ -228,7 +248,7 @@ function buildIcs(rows: Row[], siteUrl: string, filters: Filters) {
   return lines.join("\r\n");
 }
 
-function buildRss(rows: Row[], siteUrl: string) {
+function buildRss(rows: Row[], siteUrl: string, lastModified: Date) {
   const items = rows
     .map((ev) => {
       const next = ev.occurrences[0];
@@ -260,10 +280,39 @@ function buildRss(rows: Row[], siteUrl: string) {
     <atom:link href="${escXml(siteUrl)}/feeds.rss" rel="self" type="application/rss+xml" />
     <description>Community-built calendar of yo-yo and skill toy events.</description>
     <language>en-us</language>
-    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+    <lastBuildDate>${lastModified.toUTCString()}</lastBuildDate>
 ${items}
   </channel>
 </rss>`;
+}
+
+// Largest events.updated_at across the result set. Drives ETag + Last-Modified
+// so any edit to a matching event automatically busts client/CDN caches.
+function computeEventsModified(rows: Row[]): number {
+  let max = 0;
+  for (const r of rows) {
+    const t = r.updated_at ? Date.parse(r.updated_at) : 0;
+    if (t > max) max = t;
+  }
+  return max;
+}
+
+function buildEtag(
+  format: "ics" | "rss",
+  filters: Filters,
+  lastModifiedMs: number,
+  count: number,
+): string {
+  const sig = JSON.stringify({
+    f: format,
+    t: filters.types,
+    r: filters.regions,
+    c: filters.cities,
+    free: filters.freeOnly,
+    m: lastModifiedMs,
+    n: count,
+  });
+  return `"${hashString(sig)}"`;
 }
 
 Deno.serve(async (req) => {
@@ -284,19 +333,25 @@ Deno.serve(async (req) => {
 
     let filters = parseFilters(url);
     const subToken = url.searchParams.get("token");
+    let subUpdatedAt = 0;
+
     if (subToken) {
       const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
       const { data: sub } = await supabase
         .from("feed_subscriptions")
         .select(
-          "filter_types, filter_regions, filter_cities, filter_free_only, revoked_at"
+          "filter_types, filter_regions, filter_cities, filter_free_only, revoked_at, updated_at"
         )
         .eq("token", subToken)
         .maybeSingle();
       if (!sub) {
         return new Response("Subscription not found", {
           status: 404,
-          headers: { ...corsHeaders, "Content-Type": "text/plain" },
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "text/plain",
+            "Cache-Control": "no-store",
+          },
         });
       }
       if (sub.revoked_at) {
@@ -304,7 +359,11 @@ Deno.serve(async (req) => {
           "This subscription has been revoked. Visit /feeds/manage to create a new one.",
           {
             status: 410,
-            headers: { ...corsHeaders, "Content-Type": "text/plain" },
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "text/plain",
+              "Cache-Control": "no-store",
+            },
           }
         );
       }
@@ -314,30 +373,61 @@ Deno.serve(async (req) => {
         cities: (sub.filter_cities as string[] | null) ?? null,
         freeOnly: !!sub.filter_free_only,
       };
-      // Best-effort access timestamp; don't await to keep response fast.
+      subUpdatedAt = sub.updated_at ? Date.parse(sub.updated_at) : 0;
+      // Best-effort access timestamp; don't block the response.
       supabase
         .from("feed_subscriptions")
         .update({ last_accessed_at: new Date().toISOString() })
         .eq("token", subToken)
         .then(() => {});
     }
+
     const rows = await loadEvents(filters);
 
+    // Bust the cache when EITHER the matching events OR the subscription's
+    // own filters change.
+    const lastModifiedMs = Math.max(computeEventsModified(rows), subUpdatedAt);
+    const lastModified = new Date(lastModifiedMs || Date.now());
+    const format: "ics" | "rss" = isRss ? "rss" : "ics";
+    const etag = buildEtag(format, filters, lastModifiedMs, rows.length);
+
+    // Conditional GET — most calendar clients send these on every poll.
+    const ifNoneMatch = req.headers.get("if-none-match");
+    const ifModifiedSince = req.headers.get("if-modified-since");
+    const since = ifModifiedSince ? Date.parse(ifModifiedSince) : NaN;
+    const notModified =
+      (ifNoneMatch && ifNoneMatch === etag) ||
+      (!Number.isNaN(since) &&
+        lastModifiedMs > 0 &&
+        // Last-Modified is second-precision; compare at that resolution.
+        since >= Math.floor(lastModifiedMs / 1000) * 1000);
+
+    const cacheControl = subToken ? PRIVATE_CACHE_CONTROL : PUBLIC_CACHE_CONTROL;
+    const sharedHeaders: Record<string, string> = {
+      ...corsHeaders,
+      ETag: etag,
+      "Last-Modified": lastModified.toUTCString(),
+      "Cache-Control": cacheControl,
+      Vary: "Origin",
+    };
+
+    if (notModified) {
+      return new Response(null, { status: 304, headers: sharedHeaders });
+    }
+
     if (isRss) {
-      return new Response(buildRss(rows, siteUrl), {
+      return new Response(buildRss(rows, siteUrl, lastModified), {
         headers: {
-          ...corsHeaders,
+          ...sharedHeaders,
           "Content-Type": "application/rss+xml; charset=utf-8",
-          "Cache-Control": "public, max-age=600",
         },
       });
     }
 
     return new Response(buildIcs(rows, siteUrl, filters), {
       headers: {
-        ...corsHeaders,
+        ...sharedHeaders,
         "Content-Type": "text/calendar; charset=utf-8",
-        "Cache-Control": "public, max-age=600",
         "Content-Disposition": 'inline; filename="yoyo-events.ics"',
       },
     });
@@ -347,7 +437,11 @@ Deno.serve(async (req) => {
       JSON.stringify({ error: e instanceof Error ? e.message : "unknown" }),
       {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
       }
     );
   }
