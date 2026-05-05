@@ -128,3 +128,24 @@
     @apply py-16 md:py-20;
   }
 }
+
+@media print {
+  /* When printing the timeline, hide the rest of the page so the browser's
+     "Save as PDF" produces a clean handout. */
+  body * {
+    visibility: hidden;
+  }
+  #timeline-summary-print,
+  #timeline-summary-print * {
+    visibility: visible;
+  }
+  #timeline-summary-print {
+    position: absolute;
+    inset: 0;
+    background: white;
+    padding: 24px;
+  }
+  @page {
+    margin: 0.5in;
+  }
+}
