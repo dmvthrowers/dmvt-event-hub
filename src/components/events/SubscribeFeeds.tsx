@@ -15,6 +15,7 @@ import {
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { EVENT_TYPE_LABEL, type EventType } from "@/lib/events";
+import { TimelineSummary } from "./TimelineSummary";
 
 /**
  * Subscribe-to-calendar block with category + location filters.
@@ -261,6 +262,11 @@ export const SubscribeFeeds = () => {
           icon={<Rss className="h-4 w-4" />}
         />
       </div>
+
+      {/* Next 30 days timeline preview (PDF / share / copy) */}
+      <TimelineSummary
+        filters={{ types, regions, cities, freeOnly }}
+      />
 
       {/* Personal link + unsubscribe notice */}
       <PersonalLinkBlock
