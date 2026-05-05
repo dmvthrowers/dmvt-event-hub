@@ -217,21 +217,20 @@ export const TimelineSummary = ({ filters }: { filters: Filters }) => {
         </div>
       </div>
 
-      {/* Print-only header */}
-      <div className="hidden print:mb-6 print:block">
-        <h1 className="font-display text-2xl text-navy">
-          YoYo Events — next 30 days
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {format(new Date(), "MMMM d, yyyy")}
-          {filterSummary(filters)}
-        </p>
-      </div>
-
       <div
         id="timeline-summary-print"
         className="mt-5 border border-hairline/70 bg-cream-mid print:mt-0 print:border-0 print:bg-white"
       >
+        {/* Print-only header (lives inside the print region) */}
+        <div className="hidden p-4 print:block">
+          <h1 className="font-display text-2xl text-navy">
+            YoYo Events — next 30 days
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {format(new Date(), "MMMM d, yyyy")}
+            {filterSummary(filters)}
+          </p>
+        </div>
         {rows === null ? (
           <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" /> Loading timeline…
