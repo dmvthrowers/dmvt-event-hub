@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_events_updated_at ON public.events (updated_at DESC);
