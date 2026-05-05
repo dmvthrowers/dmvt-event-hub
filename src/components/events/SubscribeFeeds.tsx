@@ -263,6 +263,11 @@ export const SubscribeFeeds = () => {
         />
       </div>
 
+      {/* Next 30 days timeline preview (PDF / share / copy) */}
+      <TimelineSummary
+        filters={{ types, regions, cities, freeOnly }}
+      />
+
       {/* Personal link + unsubscribe notice */}
       <PersonalLinkBlock
         types={types}
