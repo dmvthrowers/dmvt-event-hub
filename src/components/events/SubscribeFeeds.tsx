@@ -15,6 +15,7 @@ import {
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { EVENT_TYPE_LABEL, type EventType } from "@/lib/events";
+import { TimelineSummary } from "./TimelineSummary";
 
 /**
  * Subscribe-to-calendar block with category + location filters.
