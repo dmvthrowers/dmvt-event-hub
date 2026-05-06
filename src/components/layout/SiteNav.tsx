@@ -75,7 +75,7 @@ export const SiteNav = () => {
           type="button"
           className="p-2 text-navy md:hidden"
           aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
+          aria-expanded={open ? "true" : "false"}
           aria-controls="mobile-nav"
           onClick={() => setOpen((v) => !v)}
         >

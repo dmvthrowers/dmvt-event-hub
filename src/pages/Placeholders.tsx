@@ -9,12 +9,7 @@ export const AboutPage = () => {
       <section className="relative bg-navy text-cream">
         <div
           aria-hidden
-          className="absolute inset-0 opacity-[0.06]"
-          style={{
-            backgroundImage:
-              "radial-gradient(hsl(var(--cream)) 1px, transparent 1px)",
-            backgroundSize: "22px 22px",
-          }}
+          className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(hsl(var(--cream))_1px,transparent_1px)] [background-size:22px_22px]"
         />
         <div className="container-dmvt relative section-pad text-center">
           <p className="label-caps text-red">About YoYo Events</p>
