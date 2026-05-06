@@ -51,7 +51,9 @@ export const RenewEventPage = () => {
 
   return (
     <SiteLayout>
-      <section className="container-dmvt section-pad max-w-xl text-center">
+      <section className="container-dmvt section-pad max-w-xl">
+        <Breadcrumbs items={[{ label: "Renew event" }]} />
+        <div className="mt-6 text-center">
         {state.status === "loading" && (
           <div className="py-16">
             <Loader2 className="mx-auto h-8 w-8 animate-spin text-red" />
@@ -104,6 +106,7 @@ export const RenewEventPage = () => {
             </div>
           </>
         )}
+        </div>
       </section>
     </SiteLayout>
   );
