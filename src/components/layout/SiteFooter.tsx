@@ -23,7 +23,9 @@ export const SiteFooter = () => {
           <p className="label-caps text-cream/60">Explore</p>
           <ul className="mt-3 space-y-2 text-sm">
             <li><Link to="/events" className="hover:text-red">Browse events</Link></li>
+            <li><Link to="/subscribe" className="hover:text-red">Subscribe to calendar</Link></li>
             <li><Link to="/submit" className="hover:text-red">Submit an event</Link></li>
+            <li><Link to="/feeds/manage" className="hover:text-red">Manage my subscriptions</Link></li>
             <li><Link to="/about" className="hover:text-red">About this calendar</Link></li>
           </ul>
         </div>
