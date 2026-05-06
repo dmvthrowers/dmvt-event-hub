@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 type Status = "loading" | "ok" | "error";
 

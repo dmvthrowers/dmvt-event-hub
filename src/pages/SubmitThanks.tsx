@@ -33,6 +33,7 @@ export const SubmitThanksPage = () => {
             Browse Events
           </Link>
         </div>
+        </div>
       </section>
     </SiteLayout>
   );
