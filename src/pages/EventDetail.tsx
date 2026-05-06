@@ -24,7 +24,7 @@ import {
   formatLocation,
   formatOccurrenceWhen,
   typeBadgeClass,
-  typeColor,
+  typeSolidBgClass,
   type EventType,
   type OccurrenceWithEvent,
 } from "@/lib/events";
@@ -257,8 +257,7 @@ export const EventDetailPage = () => {
               {EVENT_TYPE_LABEL[event.type]}
             </span>
             <span
-              className="label-caps inline-block px-2 py-0.5 text-cream"
-              style={{ background: typeColor(event.type) }}
+              className={`label-caps inline-block px-2 py-0.5 text-cream ${typeSolidBgClass(event.type)}`}
             >
               {formatCost(event as unknown as OccurrenceWithEvent["event"])}
             </span>

@@ -54,6 +54,15 @@ export function typeBadgeClass(type: EventType): string {
   }
 }
 
+/** Tailwind bg class for solid-background cost badges */
+export function typeSolidBgClass(type: EventType): string {
+  switch (type) {
+    case "workshop": return "bg-navy";
+    case "meetup": return "bg-red";
+    case "contest": return "bg-red-dark";
+  }
+}
+
 /** Hex color used by Leaflet markers + calendar chips */
 export function typeColor(type: EventType): string {
   switch (type) {

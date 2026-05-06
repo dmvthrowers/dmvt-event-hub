@@ -5,6 +5,8 @@
     "paths": {
       "@/*": ["./src/*"]
     },
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "noUnusedParameters": false,
     "skipLibCheck": true,
