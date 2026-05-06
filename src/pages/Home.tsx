@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarDays, MapPin, ListChecks, Plus, ArrowUpRight } from "lucide-react";
+import { ArrowRight, CalendarDays, MapPin, ListChecks, Plus, ArrowUpRight, Rss } from "lucide-react";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 
 const Home = () => {
@@ -36,10 +36,16 @@ const Home = () => {
               Browse Events <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              to="/submit"
+              to="/subscribe"
               className="label-caps inline-flex items-center gap-2 border-2 border-cream px-6 py-3 text-cream hover:bg-cream hover:text-navy"
             >
-              Submit an Event
+              <Rss className="h-4 w-4" /> Subscribe
+            </Link>
+            <Link
+              to="/submit"
+              className="label-caps inline-flex items-center gap-2 text-cream/80 hover:text-cream"
+            >
+              Submit an Event <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
         </div>

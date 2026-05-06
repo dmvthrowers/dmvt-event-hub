@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, ShieldOff, Trash2, Check, ArrowLeft } from "lucide-react";
+import { Mail, ShieldOff, Trash2, Check } from "lucide-react";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 type Sub = {
   id: string;
@@ -108,12 +109,12 @@ export const FeedsManagePage = () => {
   return (
     <SiteLayout>
       <section className="mx-auto max-w-3xl px-6 py-16 md:py-24">
-        <Link
-          to="/events"
-          className="label-caps inline-flex items-center gap-1 text-muted-foreground hover:text-red"
-        >
-          <ArrowLeft className="h-3 w-3" /> Back to events
-        </Link>
+        <Breadcrumbs
+          items={[
+            { label: "Subscribe", to: "/subscribe" },
+            { label: "Manage subscriptions" },
+          ]}
+        />
 
         <h1 className="mt-4 font-display text-4xl text-navy md:text-5xl">
           Manage your subscriptions

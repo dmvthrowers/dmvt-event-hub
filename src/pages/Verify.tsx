@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 type Status = "loading" | "ok" | "error";
 
@@ -43,7 +44,9 @@ export const VerifyPage = () => {
 
   return (
     <SiteLayout>
-      <section className="container-dmvt section-pad max-w-2xl text-center">
+      <section className="container-dmvt section-pad max-w-2xl">
+        <Breadcrumbs items={[{ label: "Verify event" }]} />
+        <div className="mt-6 text-center">
         {status === "loading" && (
           <>
             <p className="label-caps text-red">Verifying</p>
@@ -83,6 +86,7 @@ export const VerifyPage = () => {
             </div>
           </>
         )}
+        </div>
       </section>
     </SiteLayout>
   );

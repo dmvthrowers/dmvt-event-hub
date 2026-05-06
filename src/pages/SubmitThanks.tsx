@@ -1,12 +1,20 @@
 import { useLocation, Link } from "react-router-dom";
 import { SiteLayout } from "@/components/layout/SiteLayout";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 export const SubmitThanksPage = () => {
   const loc = useLocation();
   const email = (loc.state as { email?: string } | null)?.email;
   return (
     <SiteLayout>
-      <section className="container-dmvt section-pad max-w-2xl text-center">
+      <section className="container-dmvt section-pad max-w-2xl">
+        <Breadcrumbs
+          items={[
+            { label: "Submit", to: "/submit" },
+            { label: "Thanks" },
+          ]}
+        />
+        <div className="mt-6 text-center">
         <p className="label-caps text-red">Almost there</p>
         <h1 className="mt-2 text-4xl text-navy md:text-5xl">Check your inbox</h1>
         <p className="mt-4 text-lg text-muted-foreground">
@@ -24,6 +32,7 @@ export const SubmitThanksPage = () => {
           <Link to="/events" className="border-2 border-navy bg-navy px-6 py-3 text-cream">
             Browse Events
           </Link>
+        </div>
         </div>
       </section>
     </SiteLayout>
