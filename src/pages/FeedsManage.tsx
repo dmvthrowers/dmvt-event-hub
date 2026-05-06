@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Mail, ShieldOff, Trash2, Check } from "lucide-react";
