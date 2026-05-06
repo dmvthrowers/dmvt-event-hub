@@ -7,7 +7,8 @@ import { FilterBar } from "@/components/events/FilterBar";
 import { EventListView } from "@/components/events/EventListView";
 import { EventMapView } from "@/components/events/EventMapView";
 import { EventCalendarView } from "@/components/events/EventCalendarView";
-import { SubscribeFeeds } from "@/components/events/SubscribeFeeds";
+import { Link } from "react-router-dom";
+import { Calendar as CalendarIcon } from "lucide-react";
 import {
   DEFAULT_FILTERS,
   applyFilters,
@@ -35,20 +36,29 @@ export const EventsPage = () => {
       <section className="bg-navy text-cream">
         <div className="container-dmvt py-12 md:py-16">
           <p className="label-caps text-red">Find your crew</p>
-          <h1 className="mt-3 font-display text-4xl text-cream md:text-5xl">
-            Events Explorer
-          </h1>
-          <p className="mt-3 max-w-2xl text-cream/80">
-            Workshops, meetups, and contests submitted by the yo-yo community.
-            Browse the list, drop pins on the map, or scan the month at a glance.
-          </p>
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h1 className="mt-3 font-display text-4xl text-cream md:text-5xl">
+                Events Explorer
+              </h1>
+              <p className="mt-3 max-w-2xl text-cream/80">
+                Workshops, meetups, and contests submitted by the yo-yo
+                community. Browse the list, drop pins on the map, or scan the
+                month at a glance.
+              </p>
+            </div>
+            <Link
+              to="/subscribe"
+              className="label-caps inline-flex w-fit items-center gap-2 bg-red px-4 py-2.5 text-cream hover:bg-red-dark"
+            >
+              <CalendarIcon className="h-4 w-4" /> Subscribe to calendar
+            </Link>
+          </div>
         </div>
       </section>
 
       <section className="container-dmvt py-8 md:py-10">
-        <SubscribeFeeds />
-
-        <div className="mt-8">
+        <div className="mt-0">
           <FilterBar
             filters={filters}
             onChange={setFilters}
