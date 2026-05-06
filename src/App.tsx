@@ -20,6 +20,7 @@ import AdminReportsPage from "./pages/admin/AdminReports";
 import AdminSubmittersPage from "./pages/admin/AdminSubmitters";
 import AdminStatsPage from "./pages/admin/AdminStats";
 import { FeedsManagePage } from "./pages/FeedsManage";
+import { SubscribePage } from "./pages/Subscribe";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/report/:eventId" element={<ReportEventPage />} />
           <Route path="/renew" element={<RenewEventPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/subscribe" element={<SubscribePage />} />
           <Route path="/feeds/manage" element={<FeedsManagePage />} />
           <Route path="/admin" element={<AdminLoginPage />} />
           <Route path="/admin/dashboard" element={<AdminQueuePage />} />

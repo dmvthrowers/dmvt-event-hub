@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/events", label: "Events" },
+  { to: "/subscribe", label: "Subscribe" },
   { to: "/submit", label: "Submit" },
   { to: "/about", label: "About" },
 ];
