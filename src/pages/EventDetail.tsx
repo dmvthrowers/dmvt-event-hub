@@ -16,6 +16,7 @@ import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { SiteLayout } from "@/components/layout/SiteLayout";
+import { Seo } from "@/components/seo/Seo";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -204,6 +205,7 @@ export const EventDetailPage = () => {
   if (isLoading) {
     return (
       <SiteLayout>
+        <Seo title="Loading event… — YoYo Events" description="Loading event details." path={`/events/${slug ?? ""}`} noIndex />
         <div className="flex items-center justify-center py-32">
           <Loader2 className="h-8 w-8 animate-spin text-red" />
         </div>
@@ -214,6 +216,7 @@ export const EventDetailPage = () => {
   if (isError || !event) {
     return (
       <SiteLayout>
+        <Seo title="Event not found — YoYo Events" description="This event may have been removed or is no longer published." path={`/events/${slug ?? ""}`} noIndex />
         <section className="container-dmvt section-pad text-center">
           <p className="label-caps text-red">Not found</p>
           <h1 className="mt-3 font-display text-3xl text-navy">Event unavailable</h1>
