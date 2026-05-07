@@ -9,4 +9,4 @@ Disallow: /report/
 Disallow: /feeds/manage
 Disallow: /submit/thanks
 
-Sitemap: https://events.dmvthrowers.club/sitemap.xml
+Sitemap: https://gjthxhfnyigvihywibca.supabase.co/functions/v1/sitemap
