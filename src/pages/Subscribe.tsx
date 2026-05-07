@@ -1,10 +1,16 @@
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { SubscribeFeeds } from "@/components/events/SubscribeFeeds";
+import { Seo } from "@/components/seo/Seo";
 
 export const SubscribePage = () => {
   return (
     <SiteLayout>
+      <Seo
+        title="Subscribe to the Yo-Yo Events Calendar (iCal & RSS)"
+        description="Sync yo-yo and skill toy events to Apple Calendar, Google Calendar, Outlook, or any RSS reader. Pick the categories and locations you care about."
+        path="/subscribe"
+      />
       <section className="bg-navy text-cream">
         <div className="container-dmvt py-12 md:py-16">
           <Breadcrumbs

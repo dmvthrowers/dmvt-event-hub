@@ -1,10 +1,16 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, ArrowUpRight, Calendar, MapPin, Plus } from "lucide-react";
 import { SiteLayout } from "@/components/layout/SiteLayout";
+import { Seo } from "@/components/seo/Seo";
 
 export const AboutPage = () => {
   return (
     <SiteLayout>
+      <Seo
+        title="About YoYo Events — A Calendar Built by Throwers"
+        description="YoYo Events is a free, open community calendar for yo-yo, kendama, and skill toy events. No accounts, no ads — just a shared place to find what's happening."
+        path="/about"
+      />
       {/* Hero */}
       <section className="relative bg-navy text-cream">
         <div
