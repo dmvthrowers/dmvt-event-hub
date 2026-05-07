@@ -1,14 +1,12 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /manage
+Disallow: /verify
+Disallow: /renew
+Disallow: /report/
+Disallow: /feeds/manage
+Disallow: /submit/thanks
+
+Sitemap: https://events.dmvthrowers.club/sitemap.xml
