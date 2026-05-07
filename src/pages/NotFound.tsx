@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { SiteLayout } from "@/components/layout/SiteLayout";
+import { Seo } from "@/components/seo/Seo";
 
 const NotFound = () => {
   const location = useLocation();
@@ -11,6 +12,12 @@ const NotFound = () => {
 
   return (
     <SiteLayout>
+      <Seo
+        title="Page Not Found — YoYo Events"
+        description="That page doesn't exist. Head back home or browse upcoming yo-yo and skill toy events."
+        path={location.pathname}
+        noIndex
+      />
       <section className="container-dmvt section-pad text-center">
         <p className="label-caps text-red">404</p>
         <h1 className="mt-4 font-display text-6xl font-black text-navy md:text-8xl">

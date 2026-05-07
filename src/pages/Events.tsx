@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { SiteLayout } from "@/components/layout/SiteLayout";
+import { Seo } from "@/components/seo/Seo";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { FilterBar } from "@/components/events/FilterBar";
 import { EventListView } from "@/components/events/EventListView";
@@ -60,6 +61,11 @@ export const EventsPage = () => {
 
   return (
     <SiteLayout>
+      <Seo
+        title="Browse Yo-Yo & Skill Toy Events — List, Map, Calendar"
+        description="Explore upcoming yo-yo, kendama, and skill toy workshops, meetups, and contests. Filter by type, region, or city. View as a list, map, or calendar."
+        path="/events"
+      />
       <section className="bg-navy text-cream">
         <div className="container-dmvt py-12 md:py-16">
           <p className="label-caps text-red">Find your crew</p>

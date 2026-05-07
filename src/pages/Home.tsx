@@ -1,10 +1,27 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, CalendarDays, MapPin, ListChecks, Plus, ArrowUpRight, Rss } from "lucide-react";
 import { SiteLayout } from "@/components/layout/SiteLayout";
+import { Seo } from "@/components/seo/Seo";
 
 const Home = () => {
   return (
     <SiteLayout>
+      <Seo
+        title="YoYo Events — Community Calendar for Yo-Yo & Skill Toy Meetups"
+        description="A free, community-built calendar for yo-yo, kendama, and skill toy events. Workshops, meetups, contests — anyone can add one. Subscribe in your favorite calendar app."
+        path="/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "YoYo Events",
+          url: "https://events.dmvthrowers.club/",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://events.dmvthrowers.club/events?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+        }}
+      />
       {/* Hero */}
       <section className="relative bg-navy text-cream">
         <div
