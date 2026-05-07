@@ -240,8 +240,69 @@ export const EventDetailPage = () => {
     event: { ...event } as OccurrenceWithEvent["event"],
   };
 
+  const next = upcoming[0];
+  const eventJsonLd = next
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        name: event.title,
+        description: event.description?.slice(0, 500),
+        startDate: next.start_at,
+        endDate: next.end_at,
+        eventAttendanceMode:
+          "https://schema.org/OfflineEventAttendanceMode",
+        eventStatus: "https://schema.org/EventScheduled",
+        image: event.image_url ? [event.image_url] : undefined,
+        location: {
+          "@type": "Place",
+          name: event.venue_name,
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: event.address,
+            addressLocality: event.city ?? undefined,
+            addressRegion: event.region ?? undefined,
+            addressCountry: event.country ?? undefined,
+          },
+          ...(event.latitude != null && event.longitude != null
+            ? {
+                geo: {
+                  "@type": "GeoCoordinates",
+                  latitude: event.latitude,
+                  longitude: event.longitude,
+                },
+              }
+            : {}),
+        },
+        organizer: {
+          "@type": "Organization",
+          name: event.organizer_name,
+          url: event.info_url ?? undefined,
+        },
+        offers: {
+          "@type": "Offer",
+          price: event.is_free ? 0 : event.cost_amount ?? undefined,
+          priceCurrency: event.cost_currency ?? "USD",
+          availability: "https://schema.org/InStock",
+          url: `https://events.dmvthrowers.club/events/${event.slug}`,
+        },
+        url: `https://events.dmvthrowers.club/events/${event.slug}`,
+      }
+    : undefined;
+
+  const seoDescription =
+    event.description?.replace(/\s+/g, " ").trim().slice(0, 160) ||
+    `${EVENT_TYPE_LABEL[event.type]} at ${event.venue_name}`;
+
   return (
     <SiteLayout>
+      <Seo
+        title={event.title}
+        description={seoDescription}
+        path={`/events/${event.slug}`}
+        type="event"
+        image={event.image_url ?? undefined}
+        jsonLd={eventJsonLd}
+      />
       <section className="bg-navy text-cream">
         <div className="container-dmvt py-10 md:py-14">
           <Link
