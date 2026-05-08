@@ -1,3 +1,8 @@
+# Local env (use Vercel env vars for production)
+.env
+.env.local
+.env.*.local
+
 # Logs
 logs
 *.log

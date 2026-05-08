@@ -5,11 +5,9 @@
 // caller inject their own domain into verification/manage emails (open
 // redirect → token theft).
 //
-// Configure the `SITE_URL` secret on the edge functions for production.
-// The fallback is the Lovable preview URL for this project.
+// Configure the `SITE_URL` secret on your Supabase edge functions for production.
 
-const FALLBACK_SITE_URL =
-  "https://id-preview--f250471a-b5ea-42d2-9054-9891758b5f93.lovable.app";
+const FALLBACK_SITE_URL = "https://events.dmvthrowers.club";
 
 export function getSiteUrl(): string {
   const configured = Deno.env.get("SITE_URL")?.trim();
