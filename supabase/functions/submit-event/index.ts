@@ -8,6 +8,9 @@ import { corsHeaders } from "../_shared/cors.ts";
 import { sendMail } from "../_shared/email.ts";
 import { getSiteUrl } from "../_shared/site-url.ts";
 import { newToken, slugify } from "../_shared/tokens.ts";
+import { checkRateLimit, getClientIp } from "../_shared/rate-limit.ts";
+
+const MAX_BODY_BYTES = 32 * 1024; // 32 KB
 
 const EventSchema = z.object({
   title: z.string().trim().min(3).max(200),
@@ -46,9 +49,20 @@ const EventSchema = z.object({
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST") {
-    return json({ error: "method_not_allowed" }, 405);
+  if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+
+  // IP-based rate limit: 5 submissions per IP per hour.
+  const ip = getClientIp(req);
+  const allowed = await checkRateLimit(ip, "submit-event", 5, 3600);
+  if (!allowed) return json({ error: "rate_limited" }, 429);
+
+  // Reject oversized bodies before parsing to avoid wasted work.
+  const contentLength = req.headers.get("content-length");
+  if (contentLength !== null && parseInt(contentLength, 10) > MAX_BODY_BYTES) {
+    return json({ error: "payload_too_large" }, 413);
   }
+
+  const requestId = crypto.randomUUID();
 
   let body: unknown;
   try {
@@ -145,12 +159,16 @@ Deno.serve(async (req) => {
     },
   });
 
-  return json({ ok: true, event_id: event.id });
+  return json({ ok: true, event_id: event.id }, 200, requestId);
 });
 
-function json(payload: unknown, status = 200) {
+function json(payload: unknown, status = 200, requestId?: string) {
   return new Response(JSON.stringify(payload), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+      ...(requestId ? { "x-request-id": requestId } : {}),
+    },
   });
 }

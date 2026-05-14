@@ -18,35 +18,6 @@ interface MinimalEvent {
   city: string | null;
 }
 
-const RATE_LIMIT_KEY = "dmvt_report_log";
-const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
-const RATE_MAX = 3;
-
-function checkRateLimit(): { allowed: boolean; remaining: number } {
-  try {
-    const raw = localStorage.getItem(RATE_LIMIT_KEY);
-    const log: number[] = raw ? JSON.parse(raw) : [];
-    const cutoff = Date.now() - RATE_WINDOW_MS;
-    const recent = log.filter((t) => t > cutoff);
-    return { allowed: recent.length < RATE_MAX, remaining: Math.max(0, RATE_MAX - recent.length) };
-  } catch {
-    return { allowed: true, remaining: RATE_MAX };
-  }
-}
-
-function recordReport() {
-  try {
-    const raw = localStorage.getItem(RATE_LIMIT_KEY);
-    const log: number[] = raw ? JSON.parse(raw) : [];
-    const cutoff = Date.now() - RATE_WINDOW_MS;
-    const recent = log.filter((t) => t > cutoff);
-    recent.push(Date.now());
-    localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(recent));
-  } catch {
-    /* ignore */
-  }
-}
-
 const REASONS = [
   "Spam or misleading",
   "Event has been cancelled",
@@ -54,12 +25,14 @@ const REASONS = [
   "Inappropriate content",
   "Duplicate listing",
   "Other",
-];
+] as const;
+
+type Reason = typeof REASONS[number];
 
 export const ReportEventPage = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
-  const [category, setCategory] = useState<string>(REASONS[0]);
+  const [category, setCategory] = useState<Reason>(REASONS[0]);
   const [details, setDetails] = useState("");
   const [reporterEmail, setReporterEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -88,28 +61,29 @@ export const ReportEventPage = () => {
       return;
     }
 
-    const rate = checkRateLimit();
-    if (!rate.allowed) {
-      toast.error("You've submitted several reports recently. Please try again later.");
-      return;
-    }
-
     setSubmitting(true);
-    const reason = `[${category}] ${details.trim()}`;
-    const { error } = await supabase.from("reports").insert({
-      event_id: event.id,
-      reason,
-      reporter_email: reporterEmail.trim() || null,
-      status: "open",
+
+    const { data, error } = await supabase.functions.invoke("report-event", {
+      body: {
+        event_id: event.id,
+        reason: category,
+        details: details.trim(),
+        reporter_email: reporterEmail.trim() || null,
+      },
     });
+
     setSubmitting(false);
 
-    if (error) {
-      toast.error("Could not submit report. Please try again.");
+    if (error || data?.error) {
+      const code = data?.error;
+      if (code === "rate_limited") {
+        toast.error("You've submitted several reports recently. Please try again later.");
+      } else {
+        toast.error("Could not submit report. Please try again.");
+      }
       return;
     }
 
-    recordReport();
     toast.success("Report submitted. Thank you — our team will review it.");
     navigate(`/events/${event.slug}`);
   };
@@ -180,7 +154,7 @@ export const ReportEventPage = () => {
               id="category"
               aria-label="Reason"
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => setCategory(e.target.value as Reason)}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               {REASONS.map((r) => (
