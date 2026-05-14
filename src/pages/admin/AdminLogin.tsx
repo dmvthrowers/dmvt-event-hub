@@ -1,3 +1,4 @@
+// Last updated: 2026-05-13
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,18 +44,6 @@ export const AdminLoginPage = () => {
     // On success Supabase redirects the browser — no setBusy(false) needed
   };
 
-  const handleBootstrap = async () => {
-    setBusy(true);
-    const { error } = await supabase.rpc("bootstrap_first_admin");
-    setBusy(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("You are now admin");
-      navigate("/admin/dashboard", { replace: true });
-    }
-  };
-
   return (
     <SiteLayout>
       <section className="container-dmvt py-20">
@@ -69,22 +58,14 @@ export const AdminLoginPage = () => {
               <p className="mb-3">
                 Signed in as <strong>{auth.session.user.email}</strong> but you are not an admin.
               </p>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={handleBootstrap}
-                disabled={busy}
-              >
-                Claim admin (first-time setup)
-              </Button>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Only works if no admin exists yet.
+              <p className="text-xs text-muted-foreground">
+                First admin setup now runs from the Supabase SQL editor or another privileged
+                server-side session. Use the README bootstrap step, then sign in again here.
               </p>
               <Button
                 type="button"
                 variant="ghost"
-                className="mt-2 w-full"
+                className="mt-4 w-full"
                 onClick={() => supabase.auth.signOut()}
               >
                 Sign out

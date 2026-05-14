@@ -15,7 +15,7 @@ bun run dev
 
 The app expects these env vars (auto-provided in Lovable, set manually when self-hosting):
 
-```
+```env
 VITE_SUPABASE_URL=
 VITE_SUPABASE_PUBLISHABLE_KEY=
 VITE_SUPABASE_PROJECT_ID=
@@ -52,6 +52,7 @@ VITE_SUPABASE_PROJECT_ID=
 3. **Run migrations:** `supabase link --project-ref <ref> && supabase db push` (migrations live in `supabase/migrations`).
 4. **Deploy edge functions:** `supabase functions deploy submit-event verify-event manage-event renew-event daily-maintenance`.
 5. **Schedule the cron job** in the Supabase SQL editor:
+
    ```sql
    select cron.schedule(
      'daily-maintenance',
@@ -62,8 +63,9 @@ VITE_SUPABASE_PROJECT_ID=
         ); $$
    );
    ```
+
 6. **Set function secrets** in Supabase: `DAILY_MAINTENANCE_SECRET`, plus your email provider keys when you replace the stub.
-7. **Bootstrap the first admin:** sign up via `/admin`, then in SQL: `select public.bootstrap_first_admin();` (locked to `authenticated` role and a no-op once any admin exists).
+7. **Bootstrap the first admin:** sign up via `/admin`, then run `select public.bootstrap_first_admin();` from the Supabase SQL editor or another privileged server-side session. The app no longer exposes this RPC to signed-in users, and it remains a no-op once any admin exists.
 8. **Deploy to Vercel:** point at the repo, set the three `VITE_SUPABASE_*` env vars, deploy.
 9. **Custom domain:** add `events.dmvthrowers.club` in Vercel.
 

@@ -9,15 +9,16 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { z } from "npm:zod@3.23.8";
 import { corsHeaders } from "../_shared/cors.ts";
+import { safeString } from "../_shared/validate.ts";
 
 const UpdatePatch = z.object({
-  title: z.string().trim().min(3).max(200).optional(),
-  description: z.string().trim().min(10).max(5000).optional(),
-  venue_name: z.string().trim().min(1).max(200).optional(),
-  address: z.string().trim().min(3).max(500).optional(),
-  city: z.string().trim().max(120).nullable().optional(),
-  region: z.string().trim().max(120).nullable().optional(),
-  country: z.string().trim().max(120).nullable().optional(),
+  title: safeString(200).pipe(z.string().min(3)).optional(),
+  description: safeString(5000).pipe(z.string().min(10)).optional(),
+  venue_name: safeString(200).pipe(z.string().min(1)).optional(),
+  address: safeString(500).pipe(z.string().min(3)).optional(),
+  city: safeString(120).nullable().optional(),
+  region: safeString(120).nullable().optional(),
+  country: safeString(120).nullable().optional(),
   latitude: z.number().min(-90).max(90).nullable().optional(),
   longitude: z.number().min(-180).max(180).nullable().optional(),
   start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -29,7 +30,7 @@ const UpdatePatch = z.object({
   cost_amount: z.number().min(0).max(100000).nullable().optional(),
   info_url: z.string().trim().url().max(500).nullable().optional(),
   image_url: z.string().trim().url().max(500).nullable().optional(),
-  public_contact: z.string().trim().max(500).nullable().optional(),
+  public_contact: safeString(500).nullable().optional(),
 });
 
 type ManagedEvent = {

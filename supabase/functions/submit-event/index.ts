@@ -9,21 +9,22 @@ import { sendMail } from "../_shared/email.ts";
 import { getSiteUrl } from "../_shared/site-url.ts";
 import { newToken, slugify } from "../_shared/tokens.ts";
 import { checkRateLimit, getClientIp } from "../_shared/rate-limit.ts";
+import { safeString } from "../_shared/validate.ts";
 
 const MAX_BODY_BYTES = 32 * 1024; // 32 KB
 
 const EventSchema = z.object({
-  title: z.string().trim().min(3).max(200),
-  description: z.string().trim().min(10).max(5000),
+  title: safeString(200).pipe(z.string().min(3)),
+  description: safeString(5000).pipe(z.string().min(10)),
   type: z.enum(["workshop", "meetup", "contest", "fair", "other"]),
-  organizer_name: z.string().trim().min(1).max(200),
+  organizer_name: safeString(200).pipe(z.string().min(1)),
   submitter_email: z.string().trim().email().max(255),
-  public_contact: z.string().trim().max(500).optional().nullable(),
-  venue_name: z.string().trim().min(1).max(200),
-  address: z.string().trim().min(3).max(500),
-  city: z.string().trim().max(120).optional().nullable(),
-  region: z.string().trim().max(120).optional().nullable(),
-  country: z.string().trim().max(120).optional().nullable(),
+  public_contact: safeString(500).optional().nullable(),
+  venue_name: safeString(200).pipe(z.string().min(1)),
+  address: safeString(500).pipe(z.string().min(3)),
+  city: safeString(120).optional().nullable(),
+  region: safeString(120).optional().nullable(),
+  country: safeString(120).optional().nullable(),
   latitude: z.number().min(-90).max(90).optional().nullable(),
   longitude: z.number().min(-180).max(180).optional().nullable(),
   start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -37,7 +38,7 @@ const EventSchema = z.object({
   cost_amount: z.number().min(0).max(100000).optional().nullable(),
   cost_currency: z.string().length(3).optional().nullable(),
   age_min: z.number().int().min(0).max(120).optional().nullable(),
-  age_label: z.string().trim().max(80).optional().nullable(),
+  age_label: safeString(80).optional().nullable(),
   skill_level: z.enum(["beginner", "intermediate", "advanced", "all"]),
   capacity: z.number().int().min(1).max(100000).optional().nullable(),
   info_url: z.string().trim().url().max(500).optional().nullable(),

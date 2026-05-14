@@ -16,7 +16,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
 import { sendMail } from "../_shared/email.ts";
 import { getSiteUrl } from "../_shared/site-url.ts";
-import { newToken } from "../_shared/tokens.ts";
+import { newToken, timingSafeEqual } from "../_shared/tokens.ts";
 
 interface EventRow {
   id: string;
@@ -46,8 +46,8 @@ Deno.serve(async (req) => {
   const auth = req.headers.get("authorization") ?? "";
   const bearer = auth.toLowerCase().startsWith("bearer ") ? auth.slice(7).trim() : "";
   const ok =
-    (expectedCron && cronHeader === expectedCron) ||
-    (serviceKey && bearer === serviceKey);
+    (expectedCron && cronHeader !== null && timingSafeEqual(cronHeader, expectedCron)) ||
+    (serviceKey && bearer.length > 0 && timingSafeEqual(bearer, serviceKey));
   if (!ok) {
     return json({ error: "unauthorized" }, 401);
   }

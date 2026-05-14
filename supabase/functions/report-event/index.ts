@@ -11,6 +11,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import { z } from "npm:zod@3.23.8";
 import { corsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit, getClientIp } from "../_shared/rate-limit.ts";
+import { safeString } from "../_shared/validate.ts";
 
 const MAX_BODY_BYTES = 8 * 1024; // 8 KB
 
@@ -29,7 +30,7 @@ const VALID_REASONS = [
 const ReportSchema = z.object({
   event_id: z.string().regex(UUID_RE, "Invalid event ID"),
   reason: z.enum(VALID_REASONS),
-  details: z.string().trim().min(10).max(2000),
+  details: safeString(2000).pipe(z.string().min(10)),
   reporter_email: z.string().trim().email().max(255).optional().nullable(),
 });
 
