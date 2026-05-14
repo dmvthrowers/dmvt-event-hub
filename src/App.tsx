@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Analytics } from "@vercel/analytics/react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -22,6 +23,7 @@ import AdminSubmittersPage from "./pages/admin/AdminSubmitters";
 import AdminStatsPage from "./pages/admin/AdminStats";
 import { FeedsManagePage } from "./pages/FeedsManage";
 import { SubscribePage } from "./pages/Subscribe";
+import { StatusPage } from "./pages/Status";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +34,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ErrorBoundary>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/events" element={<EventsPage />} />
@@ -43,6 +46,7 @@ const App = () => (
           <Route path="/report/:eventId" element={<ReportEventPage />} />
           <Route path="/renew" element={<RenewEventPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/status" element={<StatusPage />} />
           <Route path="/subscribe" element={<SubscribePage />} />
           <Route path="/feeds/manage" element={<FeedsManagePage />} />
           <Route path="/admin" element={<AdminLoginPage />} />
@@ -54,6 +58,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </ErrorBoundary>
       </BrowserRouter>
       <Analytics />
     </TooltipProvider>

@@ -3,7 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 
 export const SiteFooter = () => {
   return (
-    <footer className="border-t border-hairline/60 bg-navy text-cream">
+    <footer className="border-t-4 border-red bg-navy text-cream">
       <div className="container-dmvt grid gap-10 py-14 md:grid-cols-4">
         <div className="md:col-span-2">
           <p className="font-display text-3xl font-black">
@@ -61,6 +61,30 @@ export const SiteFooter = () => {
                 className="inline-flex items-center gap-1 hover:text-teal"
               >
                 ☕ Donate
+              </a>
+            </li>
+          </ul>
+
+          <p className="label-caps mt-6 text-cream/60">Legal</p>
+          <ul className="mt-3 space-y-2 text-sm">
+            <li>
+              <a
+                href="https://dmvthrowers.club/privacy.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 hover:text-red"
+              >
+                Privacy <ArrowUpRight className="h-3 w-3" />
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://dmvthrowers.club/terms.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 hover:text-red"
+              >
+                Terms <ArrowUpRight className="h-3 w-3" />
               </a>
             </li>
           </ul>

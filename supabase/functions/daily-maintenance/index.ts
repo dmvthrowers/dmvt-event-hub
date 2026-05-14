@@ -16,7 +16,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
 import { sendMail } from "../_shared/email.ts";
 import { getSiteUrl } from "../_shared/site-url.ts";
-import { newToken, timingSafeEqual } from "../_shared/tokens.ts";
+import { newToken, timingSafeEqual, hashToken } from "../_shared/tokens.ts";
 
 interface EventRow {
   id: string;
@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
     const token = newToken(32);
     const { error: tokErr } = await supabase.from("renew_tokens").insert({
       event_id: ev.id,
-      token,
+      token: await hashToken(token),
     });
     if (tokErr) {
       console.error("renew_token_insert_failed", { event_id: ev.id });

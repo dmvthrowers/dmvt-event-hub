@@ -1,5 +1,7 @@
-// Nominatim (OpenStreetMap) forward geocoder.
-// Free, no API key. Be polite: small debounce, descriptive User-Agent via Referer.
+// Geocoding via our server-side proxy (which calls Nominatim).
+// Routing through the function keeps user IPs off OpenStreetMap's servers.
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
 export interface GeocodeResult {
   display_name: string;
@@ -16,25 +18,13 @@ export interface GeocodeResult {
 
 export async function geocodeAddress(query: string): Promise<GeocodeResult[]> {
   if (!query || query.trim().length < 4) return [];
-  const url = new URL("https://nominatim.openstreetmap.org/search");
-  url.searchParams.set("q", query);
-  url.searchParams.set("format", "json");
-  url.searchParams.set("addressdetails", "1");
-  url.searchParams.set("limit", "5");
-  const res = await fetch(url.toString(), {
-    headers: { "Accept-Language": "en" },
-  });
-  if (!res.ok) return [];
-  const data = (await res.json()) as Array<{
-    display_name: string;
-    lat: string;
-    lon: string;
-    address?: GeocodeResult["address"];
-  }>;
-  return data.map((d) => ({
-    display_name: d.display_name,
-    lat: Number(d.lat),
-    lon: Number(d.lon),
-    address: d.address,
-  }));
+  const projectRef = SUPABASE_URL.replace(/^https?:\/\//, "").split(".")[0];
+  const url = `https://${projectRef}.functions.supabase.co/geocode?q=${encodeURIComponent(query.trim())}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    return (await res.json()) as GeocodeResult[];
+  } catch {
+    return [];
+  }
 }

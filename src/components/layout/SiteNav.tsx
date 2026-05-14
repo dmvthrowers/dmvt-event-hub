@@ -12,7 +12,6 @@ const navItems = [
 export const SiteNav = () => {
   const [open, setOpen] = useState(false);
 
-  // Lock body scroll while the mobile drawer is open
   useEffect(() => {
     if (typeof document === "undefined") return;
     document.body.style.overflow = open ? "hidden" : "";
@@ -22,65 +21,95 @@ export const SiteNav = () => {
   }, [open]);
 
   return (
-    <nav
-      aria-label="Primary"
-      className="sticky top-0 z-40 border-b border-hairline/60 bg-cream/95 backdrop-blur supports-[backdrop-filter]:bg-cream/80"
-    >
-      <div className="container-dmvt flex h-16 items-center justify-between">
-        <Link
-          to="/"
-          className="flex items-center gap-2"
-          onClick={() => setOpen(false)}
-        >
-          <span className="font-display text-xl font-black text-navy md:text-2xl">
-            YoYo <span className="text-red">Events</span>
-          </span>
-        </Link>
-
-        {/* Desktop nav */}
-        <div className="hidden items-center gap-8 md:flex">
-          {navItems.map((item) => (
-            <RRNavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                cn(
-                  "label-caps relative text-navy transition-colors hover:text-red",
-                  isActive &&
-                    "text-red after:absolute after:-bottom-[22px] after:left-0 after:h-[2px] after:w-full after:bg-red"
-                )
-              }
-            >
-              {item.label}
-            </RRNavLink>
-          ))}
-          <Link
-            to="/submit"
-            className="label-caps inline-flex items-center gap-1 bg-red px-4 py-2 text-cream hover:bg-red-dark"
-          >
-            <Plus className="h-3.5 w-3.5" /> Submit
-          </Link>
+    <nav aria-label="Primary" className="sticky top-0 z-40">
+      {/* Topbar — mirrors the map app's red ecosystem strip */}
+      <div className="hidden bg-red md:block">
+        <div className="container-dmvt flex items-center justify-end gap-5 py-1.5">
           <a
-            href="https://ko-fi.com/dmvthrowers"
+            href="https://dmvthrowers.club/"
             target="_blank"
             rel="noopener noreferrer"
-            className="label-caps inline-flex items-center gap-1 bg-teal px-4 py-2 text-cream hover:bg-teal/90"
+            className="label-caps text-xs text-white/90 hover:text-white"
           >
-            ☕ Donate
+            DMV Throwers ↗
+          </a>
+          <a
+            href="https://map.dmvthrowers.club/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="label-caps text-xs text-white/90 hover:text-white"
+          >
+            YoYo Map ↗
+          </a>
+          <a
+            href="https://dmvthrowers.club/vsyc26.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="label-caps text-xs text-white/90 hover:text-white"
+          >
+            VSYC ↗
           </a>
         </div>
+      </div>
 
-        {/* Mobile toggle */}
-        <button
-          type="button"
-          className="p-2 text-navy md:hidden"
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+      {/* Main nav */}
+      <div className="border-b border-hairline/60 bg-cream/95 backdrop-blur supports-[backdrop-filter]:bg-cream/80">
+        <div className="container-dmvt flex h-16 items-center justify-between">
+          <Link
+            to="/"
+            className="flex items-center gap-2"
+            onClick={() => setOpen(false)}
+          >
+            <span className="font-display text-xl font-black text-navy md:text-2xl">
+              YoYo <span className="text-red">Events</span>
+            </span>
+          </Link>
+
+          {/* Desktop nav */}
+          <div className="hidden items-center gap-8 md:flex">
+            {navItems.map((item) => (
+              <RRNavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  cn(
+                    "label-caps relative text-navy transition-colors hover:text-red",
+                    isActive &&
+                      "text-red after:absolute after:-bottom-[22px] after:left-0 after:h-[2px] after:w-full after:bg-red"
+                  )
+                }
+              >
+                {item.label}
+              </RRNavLink>
+            ))}
+            <Link
+              to="/submit"
+              className="label-caps inline-flex items-center gap-1 bg-red px-4 py-2 text-cream hover:bg-red-dark"
+            >
+              <Plus className="h-3.5 w-3.5" /> Submit
+            </Link>
+            <a
+              href="https://ko-fi.com/dmvthrowers"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="label-caps inline-flex items-center gap-1 bg-teal px-4 py-2 text-cream hover:bg-teal/90"
+            >
+              ☕ Donate
+            </a>
+          </div>
+
+          {/* Mobile toggle */}
+          <button
+            type="button"
+            className="p-2 text-navy md:hidden"
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile drawer */}
@@ -129,6 +158,24 @@ export const SiteNav = () => {
               >
                 Manage subscriptions
               </RRNavLink>
+            </div>
+            <div className="mt-2 flex flex-col border-t border-hairline/40 pt-2">
+              <a
+                href="https://dmvthrowers.club/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="label-caps border-l-4 border-transparent px-3 py-2 text-xs text-muted-foreground hover:bg-cream-mid"
+              >
+                DMV Throwers ↗
+              </a>
+              <a
+                href="https://map.dmvthrowers.club/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="label-caps border-l-4 border-transparent px-3 py-2 text-xs text-muted-foreground hover:bg-cream-mid"
+              >
+                YoYo Map ↗
+              </a>
             </div>
             <a
               href="https://ko-fi.com/dmvthrowers"

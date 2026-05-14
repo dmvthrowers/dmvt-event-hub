@@ -16,6 +16,17 @@ interface Report {
   event: { slug: string; title: string; status: string } | null;
 }
 
+async function adminAction(body: Record<string, unknown>) {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error("Not authenticated");
+  const { data, error } = await supabase.functions.invoke("admin-action", {
+    body,
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  });
+  if (error || data?.error) throw new Error(data?.error ?? error?.message ?? "Action failed");
+  return data;
+}
+
 export const AdminReportsPage = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,17 +51,24 @@ export const AdminReportsPage = () => {
   }, []);
 
   const setReportStatus = async (id: string, status: "open" | "resolved" | "dismissed") => {
-    const { error } = await supabase.from("reports").update({ status }).eq("id", id);
-    if (error) return toast.error(error.message);
-    setReports((rs) => rs.map((r) => (r.id === id ? { ...r, status } : r)));
-    toast.success("Report updated");
+    try {
+      const action = status === "resolved" ? "resolve_report" : "dismiss_report";
+      await adminAction({ action, report_id: id });
+      setReports((rs) => rs.map((r) => (r.id === id ? { ...r, status } : r)));
+      toast.success("Report updated");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Action failed");
+    }
   };
 
   const hideEvent = async (eventId: string, reportId: string) => {
-    const { error } = await supabase.from("events").update({ status: "hidden" }).eq("id", eventId);
-    if (error) return toast.error(error.message);
-    await setReportStatus(reportId, "resolved");
-    toast.success("Event hidden");
+    try {
+      await adminAction({ action: "hide_event_and_resolve", event_id: eventId, report_id: reportId });
+      setReports((rs) => rs.map((r) => (r.id === reportId ? { ...r, status: "resolved" } : r)));
+      toast.success("Event hidden and report resolved");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Action failed");
+    }
   };
 
   return (

@@ -7,7 +7,7 @@ import { z } from "npm:zod@3.23.8";
 import { corsHeaders } from "../_shared/cors.ts";
 import { sendMail } from "../_shared/email.ts";
 import { getSiteUrl } from "../_shared/site-url.ts";
-import { newToken } from "../_shared/tokens.ts";
+import { newToken, hashToken } from "../_shared/tokens.ts";
 
 const Body = z.object({ token: z.string().min(16).max(128) });
 
@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
   const { data: tokenRow, error: tokErr } = await supabase
     .from("verification_tokens")
     .select("id, event_id, expires_at, consumed_at")
-    .eq("token", parsed.data.token)
+    .eq("token", await hashToken(parsed.data.token))
     .maybeSingle();
 
   if (tokErr || !tokenRow) return json({ error: "invalid_token" }, 404);
@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
   const manageToken = newToken(32);
   await supabase.from("manage_tokens").insert({
     event_id: event.id,
-    token: manageToken,
+    token: await hashToken(manageToken),
   });
 
   const siteUrl = getSiteUrl();

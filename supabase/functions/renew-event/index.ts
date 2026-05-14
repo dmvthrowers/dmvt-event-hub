@@ -7,6 +7,7 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { z } from "npm:zod@3.23.8";
 import { corsHeaders } from "../_shared/cors.ts";
+import { hashToken } from "../_shared/tokens.ts";
 
 const Schema = z.object({
   token: z.string().min(20).max(128),
@@ -33,7 +34,7 @@ Deno.serve(async (req) => {
   const { data: tok, error: tokErr } = await supabase
     .from("renew_tokens")
     .select("id, event_id, consumed_at, expires_at")
-    .eq("token", parsed.data.token)
+    .eq("token", await hashToken(parsed.data.token))
     .maybeSingle();
 
   if (tokErr || !tok) return json({ error: "invalid_token" }, 404);

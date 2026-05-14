@@ -10,6 +10,7 @@ import { getSiteUrl } from "../_shared/site-url.ts";
 import { newToken, slugify } from "../_shared/tokens.ts";
 import { checkRateLimit, getClientIp } from "../_shared/rate-limit.ts";
 import { safeString } from "../_shared/validate.ts";
+import { hashToken } from "../_shared/tokens.ts";
 
 const MAX_BODY_BYTES = 32 * 1024; // 32 KB
 
@@ -140,7 +141,7 @@ Deno.serve(async (req) => {
   const verifyToken = newToken(32);
   const { error: tokError } = await supabase.from("verification_tokens").insert({
     event_id: event.id,
-    token: verifyToken,
+    token: await hashToken(verifyToken),
   });
   if (tokError) {
     console.error("token_insert_failed", tokError);

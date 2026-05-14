@@ -10,6 +10,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import { z } from "npm:zod@3.23.8";
 import { corsHeaders } from "../_shared/cors.ts";
 import { safeString } from "../_shared/validate.ts";
+import { hashToken } from "../_shared/tokens.ts";
 
 const UpdatePatch = z.object({
   title: safeString(200).pipe(z.string().min(3)).optional(),
@@ -109,7 +110,7 @@ async function loadEventByToken(
   const { data: tok } = await supabase
     .from("manage_tokens")
     .select("event_id, revoked_at")
-    .eq("token", token)
+    .eq("token", await hashToken(token))
     .maybeSingle();
   if (!tok || tok.revoked_at) return null;
   const { data: event } = await supabase

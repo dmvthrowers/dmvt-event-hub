@@ -12,7 +12,7 @@
 //        (used when the user has the link itself).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { newToken } from "../_shared/tokens.ts";
+import { newToken, hashToken } from "../_shared/tokens.ts";
 import { sendMail } from "../_shared/email.ts";
 import { getSiteUrl } from "../_shared/site-url.ts";
 
@@ -38,7 +38,7 @@ async function resolveEmail(
   const { data, error } = await supabase
     .from("feed_manage_tokens")
     .select("email, expires_at, consumed_at")
-    .eq("token", manageToken)
+    .eq("token", await hashToken(manageToken))
     .maybeSingle();
   if (error || !data) return null;
   if (data.consumed_at) return null;
@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
         .limit(1);
       if (subs && subs.length > 0) {
         const token = newToken(24);
-        await supabase.from("feed_manage_tokens").insert({ email, token });
+        await supabase.from("feed_manage_tokens").insert({ email, token: await hashToken(token) });
         const manage_url = `${getSiteUrl()}/feeds/manage?mt=${token}`;
         await sendMail({
           to: email,

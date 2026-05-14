@@ -24,6 +24,17 @@ interface PendingEvent {
   status: string;
 }
 
+async function adminAction(body: Record<string, unknown>) {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error("Not authenticated");
+  const { data, error } = await supabase.functions.invoke("admin-action", {
+    body,
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  });
+  if (error || data?.error) throw new Error(data?.error ?? error?.message ?? "Action failed");
+  return data;
+}
+
 export const AdminQueuePage = () => {
   const [pending, setPending] = useState<PendingEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,17 +62,16 @@ export const AdminQueuePage = () => {
   }, []);
 
   const updateStatus = async (id: string, status: "published" | "hidden") => {
-    const patch =
-      status === "published"
-        ? { status, published_at: new Date().toISOString() }
-        : { status };
-    const { error } = await supabase.from("events").update(patch).eq("id", id);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      await adminAction({
+        action: status === "published" ? "publish_event" : "hide_event",
+        event_id: id,
+      });
+      toast.success(status === "published" ? "Event published" : "Event hidden");
+      setPending((p) => p.filter((e) => e.id !== id));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Action failed");
     }
-    toast.success(status === "published" ? "Event published" : "Event hidden");
-    setPending((p) => p.filter((e) => e.id !== id));
   };
 
   return (

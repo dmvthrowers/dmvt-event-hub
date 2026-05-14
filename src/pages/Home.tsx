@@ -136,6 +136,41 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Privacy pledge */}
+      <section className="relative bg-navy text-cream">
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(hsl(var(--cream))_1px,transparent_1px)] [background-size:22px_22px]"
+        />
+        <div className="container-dmvt relative section-pad">
+          <div className="grid gap-10 md:grid-cols-2 md:items-center">
+            <div>
+              <p className="label-caps text-red">Privacy First</p>
+              <h2 className="mt-3 text-3xl md:text-5xl">What we don't do</h2>
+              <p className="mt-4 text-cream/70">
+                YoYo Events collects the minimum needed to run a community
+                calendar — nothing more.
+              </p>
+            </div>
+            <ul className="space-y-4">
+              {[
+                "No accounts required to browse or subscribe",
+                "No tracking cookies or third-party analytics pixels",
+                "No selling or sharing your email with anyone",
+                "Submitter emails are used only for verification and event management",
+                "Geocoding runs server-side — your IP never touches mapping APIs",
+                "You can delete your event and all associated data at any time",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-3 text-sm text-cream/80">
+                  <span className="mt-0.5 h-4 w-4 shrink-0 rounded-full bg-red" aria-hidden />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="bg-navy text-cream">
         <div className="container-dmvt section-pad text-center">
