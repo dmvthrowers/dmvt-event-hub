@@ -32,6 +32,17 @@ const UpdatePatch = z.object({
   public_contact: z.string().trim().max(500).nullable().optional(),
 });
 
+type ManagedEvent = {
+  id: string;
+  start_date: string;
+  end_date: string;
+  all_day: boolean;
+  start_time: string | null;
+  end_time: string | null;
+  recurrence: "none" | "weekly" | "biweekly" | "monthly";
+  recurrence_until: string | null;
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -110,7 +121,7 @@ async function loadEventByToken(
 
 async function rebuildOccurrences(
   supabase: ReturnType<typeof createClient>,
-  event: Record<string, any>,
+  event: ManagedEvent,
 ) {
   await supabase.from("event_occurrences").delete().eq("event_id", event.id);
   const dayMs = 24 * 60 * 60 * 1000;

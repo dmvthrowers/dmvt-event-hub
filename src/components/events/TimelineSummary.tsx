@@ -25,6 +25,34 @@ type TimelineRow = {
   isFree: boolean;
 };
 
+type EventJoinRow = {
+  title: string;
+  slug: string;
+  type: EventType;
+  venue_name: string;
+  city: string | null;
+  region: string | null;
+  is_free: boolean;
+  status: string;
+};
+
+type OccurrenceJoinRow = {
+  id: string;
+  start_at: string;
+  end_at: string;
+  all_day: boolean;
+  events: EventJoinRow | EventJoinRow[] | null;
+};
+
+type ShareCapableNavigator = Navigator & {
+  share?: (data: ShareData) => Promise<void>;
+};
+
+function getJoinedEvent(events: OccurrenceJoinRow["events"]): EventJoinRow | null {
+  if (!events) return null;
+  return Array.isArray(events) ? events[0] ?? null : events;
+}
+
 /**
  * Compact "next 30 days" timeline. Mirrors the SubscribeFeeds filters so the
  * preview matches what a subscriber would actually receive in their calendar.
@@ -82,8 +110,8 @@ export const TimelineSummary = ({ filters }: { filters: Filters }) => {
           : null;
 
       const mapped: TimelineRow[] = [];
-      for (const r of data) {
-        const e = (r as any).events;
+      for (const r of (data as OccurrenceJoinRow[])) {
+        const e = getJoinedEvent(r.events);
         if (!e) continue;
         if (regionSet && !regionSet.has(lc(e.region))) continue;
         if (citySet && !citySet.has(lc(e.city))) continue;
@@ -156,9 +184,10 @@ export const TimelineSummary = ({ filters }: { filters: Filters }) => {
   };
 
   const share = async () => {
-    if (typeof navigator !== "undefined" && (navigator as any).share) {
+    const nav = navigator as ShareCapableNavigator;
+    if (typeof navigator !== "undefined" && typeof nav.share === "function") {
       try {
-        await (navigator as any).share({
+        await nav.share({
           title: "YoYo Events — next 30 days",
           text: plainText,
         });

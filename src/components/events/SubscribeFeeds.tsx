@@ -17,6 +17,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { EVENT_TYPE_LABEL, type EventType } from "@/lib/events";
 import { TimelineSummary } from "./TimelineSummary";
 
+type FeedSubscribeResponse = {
+  ics_url: string;
+  webcal_url: string;
+  rss_url: string;
+  manage_url: string;
+};
+
+type FeedSubscribeError = {
+  error?: string;
+};
+
 /**
  * Subscribe-to-calendar block with category + location filters.
  *
@@ -103,7 +114,11 @@ export const SubscribeFeeds = () => {
 
   const toggle = <T,>(set: Set<T>, value: T, setter: (s: Set<T>) => void) => {
     const next = new Set(set);
-    next.has(value) ? next.delete(value) : next.add(value);
+    if (next.has(value)) {
+      next.delete(value);
+    } else {
+      next.add(value);
+    }
     setter(next);
   };
 
@@ -293,12 +308,7 @@ const PersonalLinkBlock = ({
   const [email, setEmail] = useState("");
   const [label, setLabel] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{
-    ics_url: string;
-    webcal_url: string;
-    rss_url: string;
-    manage_url: string;
-  } | null>(null);
+  const [result, setResult] = useState<FeedSubscribeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -316,12 +326,23 @@ const PersonalLinkBlock = ({
         filter_free_only: freeOnly,
       },
     });
+    const payload = (data ?? null) as FeedSubscribeResponse | FeedSubscribeError | null;
     setLoading(false);
-    if (error || (data as any)?.error) {
-      setError((data as any)?.error || "Could not create link");
+    if (error || payload?.error) {
+      setError(payload?.error || "Could not create link");
       return;
     }
-    setResult(data as any);
+    if (
+      payload &&
+      "ics_url" in payload &&
+      "webcal_url" in payload &&
+      "rss_url" in payload &&
+      "manage_url" in payload
+    ) {
+      setResult(payload);
+      return;
+    }
+    setError("Could not create link");
   };
 
   const copy = async (label: string, value: string) => {

@@ -18,6 +18,15 @@ type Sub = {
   revoked_at: string | null;
 };
 
+type ManageListResponse = {
+  email: string;
+  subscriptions: Sub[];
+};
+
+type ManageFeedError = {
+  error?: string;
+};
+
 export const FeedsManagePage = () => {
   const [params] = useSearchParams();
   const mt = params.get("mt"); // magic-link manage token
@@ -46,13 +55,18 @@ export const FeedsManagePage = () => {
         "manage-feed-subscription",
         { body: { action: "list", manage_token: mt } }
       );
+      const payload = (data ?? null) as ManageListResponse | ManageFeedError | null;
       setLoading(false);
-      if (error || (data as any)?.error) {
-        setError((data as any)?.error || "Could not load subscriptions");
+      if (error || payload?.error) {
+        setError(payload?.error || "Could not load subscriptions");
         return;
       }
-      setSessionEmail((data as any).email);
-      setSubs((data as any).subscriptions);
+      if (payload && "email" in payload && "subscriptions" in payload) {
+        setSessionEmail(payload.email);
+        setSubs(payload.subscriptions);
+        return;
+      }
+      setError("Could not load subscriptions");
     })();
   }, [mt]);
 
@@ -79,8 +93,9 @@ export const FeedsManagePage = () => {
       "manage-feed-subscription",
       { body: { action: "revoke_one", token: directToken } }
     );
+    const payload = (data ?? null) as ManageFeedError | null;
     setLoading(false);
-    if (error || (data as any)?.error) {
+    if (error || payload?.error) {
       setError("Could not revoke. The link may already be revoked.");
       return;
     }

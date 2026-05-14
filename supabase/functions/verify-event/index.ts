@@ -11,6 +11,17 @@ import { newToken } from "../_shared/tokens.ts";
 
 const Body = z.object({ token: z.string().min(16).max(128) });
 
+type ManagedEvent = {
+  id: string;
+  start_date: string;
+  end_date: string;
+  all_day: boolean;
+  start_time: string | null;
+  end_time: string | null;
+  recurrence: "none" | "weekly" | "biweekly" | "monthly";
+  recurrence_until: string | null;
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
@@ -95,7 +106,7 @@ Deno.serve(async (req) => {
 
 async function materializeOccurrences(
   supabase: ReturnType<typeof createClient>,
-  event: Record<string, any>,
+  event: ManagedEvent,
 ) {
   // Clear any existing occurrences first
   await supabase.from("event_occurrences").delete().eq("event_id", event.id);

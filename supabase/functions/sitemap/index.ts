@@ -30,6 +30,11 @@ const STATIC_ROUTES: Array<{
   { path: "/about", changefreq: "monthly", priority: "0.5" },
 ];
 
+type SitemapEvent = {
+  slug: string;
+  updated_at: string;
+};
+
 function escXml(s: string) {
   return (s ?? "")
     .replace(/&/g, "&amp;")
@@ -71,9 +76,7 @@ Deno.serve(async (req) => {
       events && events.length > 0
         ? new Date(
             Math.max(
-              ...events.map((e: any) =>
-                new Date(e.updated_at as string).getTime()
-              )
+              ...events.map((e: SitemapEvent) => new Date(e.updated_at).getTime())
             )
           )
         : new Date();
@@ -89,9 +92,9 @@ Deno.serve(async (req) => {
           `  </url>`
       );
     }
-    for (const e of events ?? []) {
-      const slug = (e as any).slug as string;
-      const updated = new Date((e as any).updated_at as string)
+    for (const e of (events ?? []) as SitemapEvent[]) {
+      const slug = e.slug;
+      const updated = new Date(e.updated_at)
         .toISOString()
         .slice(0, 10);
       urls.push(

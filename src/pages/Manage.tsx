@@ -19,8 +19,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
-type Event = Record<string, any> | null;
+type Event = Database["public"]["Tables"]["events"]["Row"] | null;
+
+type LoadEventResponse = {
+  error?: string;
+  event?: Database["public"]["Tables"]["events"]["Row"];
+};
 
 export const ManagePage = () => {
   const [params] = useSearchParams();
@@ -39,7 +45,7 @@ export const ManagePage = () => {
     (async () => {
       const url = `https://gjthxhfnyigvihywibca.supabase.co/functions/v1/manage-event?token=${encodeURIComponent(token)}`;
       const res = await fetch(url);
-      const data = await res.json();
+      const data = (await res.json()) as LoadEventResponse;
       if (!res.ok || data?.error) {
         setError(data?.error === "invalid_token" ? "This management link is invalid or revoked." : "Couldn't load event.");
       } else {

@@ -109,6 +109,35 @@ type Filters = {
   freeOnly: boolean;
 };
 
+type EventJoinRow = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  venue_name: string;
+  address: string;
+  city: string | null;
+  region: string | null;
+  info_url: string | null;
+  type: string;
+  status: string;
+  published_at: string | null;
+  updated_at: string | null;
+};
+
+type OccurrenceJoinRow = {
+  id: string;
+  start_at: string;
+  end_at: string;
+  all_day: boolean;
+  events: EventJoinRow | EventJoinRow[] | null;
+};
+
+function getJoinedEvent(events: OccurrenceJoinRow["events"]): EventJoinRow | null {
+  if (!events) return null;
+  return Array.isArray(events) ? events[0] ?? null : events;
+}
+
 function parseList(v: string | null): string[] | null {
   if (!v) return null;
   const arr = v
@@ -163,8 +192,8 @@ async function loadEvents(filters: Filters): Promise<Row[]> {
     : null;
 
   const grouped = new Map<string, Row>();
-  for (const r of data ?? []) {
-    const e = (r as any).events;
+  for (const r of ((data ?? []) as OccurrenceJoinRow[])) {
+    const e = getJoinedEvent(r.events);
     if (!e || e.status !== "published") continue;
     if (regionSet && !regionSet.has(lc(e.region))) continue;
     if (citySet && !citySet.has(lc(e.city))) continue;
