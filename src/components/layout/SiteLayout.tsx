@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { TopBar } from "./TopBar";
 import { SiteNav } from "./SiteNav";
 import { SiteFooter } from "./SiteFooter";
 
@@ -16,7 +15,6 @@ export const SiteLayout = ({ children }: SiteLayoutProps) => {
       >
         Skip to main content
       </a>
-      <TopBar />
       <SiteNav />
       <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
         {children}
