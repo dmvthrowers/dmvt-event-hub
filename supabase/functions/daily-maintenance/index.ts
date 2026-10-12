@@ -14,6 +14,7 @@
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
+import { buildOccurrences } from "../_shared/occurrences.ts";
 import { sendMail } from "../_shared/email.ts";
 import { getSiteUrl } from "../_shared/site-url.ts";
 import { newToken, timingSafeEqual, hashToken } from "../_shared/tokens.ts";
@@ -28,7 +29,7 @@ interface EventRow {
   start_time: string | null;
   end_time: string | null;
   all_day: boolean;
-  recurrence: "none" | "weekly" | "biweekly" | "monthly";
+  recurrence: "none" | "weekly" | "biweekly" | "monthly" | "monthly_by_weekday";
   recurrence_until: string | null;
   expires_at: string;
   status: string;
@@ -143,7 +144,7 @@ Deno.serve(async (req) => {
     if ((count ?? 0) > 0) continue;
 
     // No future occurrences — regenerate from today forward.
-    const occurrences = buildOccurrences(ev, now);
+    const occurrences = buildOccurrences(ev, { from: now });
     if (occurrences.length === 0) continue;
 
     await supabase.from("event_occurrences").delete().eq("event_id", ev.id);
@@ -164,67 +165,6 @@ Deno.serve(async (req) => {
     rematerialized,
   });
 });
-
-function buildOccurrences(ev: EventRow, fromDate: Date) {
-  const dayMs = 24 * 60 * 60 * 1000;
-  const startDate = new Date(`${ev.start_date}T00:00:00Z`);
-  const endDate = new Date(`${ev.end_date}T00:00:00Z`);
-  const spanDays = Math.round((endDate.getTime() - startDate.getTime()) / dayMs);
-  const until = new Date(`${ev.recurrence_until}T00:00:00Z`);
-
-  const stepDays =
-    ev.recurrence === "weekly" ? 7 : ev.recurrence === "biweekly" ? 14 : 0;
-
-  // Advance the cursor forward to today (or later) preserving the cadence.
-  let cursor = new Date(startDate);
-  if (ev.recurrence === "monthly") {
-    while (cursor < fromDate) {
-      cursor = new Date(cursor);
-      cursor.setUTCMonth(cursor.getUTCMonth() + 1);
-    }
-  } else if (stepDays > 0) {
-    const diffDays = Math.floor((fromDate.getTime() - cursor.getTime()) / dayMs);
-    if (diffDays > 0) {
-      const steps = Math.ceil(diffDays / stepDays);
-      cursor = new Date(cursor.getTime() + steps * stepDays * dayMs);
-    }
-  }
-
-  const out: Array<{
-    event_id: string;
-    start_at: string;
-    end_at: string;
-    all_day: boolean;
-  }> = [];
-  let safety = 0;
-  while (cursor <= until && safety < 400) {
-    const occEnd = new Date(cursor.getTime() + spanDays * dayMs);
-    const startAt = ev.all_day
-      ? new Date(`${ymd(cursor)}T00:00:00Z`)
-      : new Date(`${ymd(cursor)}T${ev.start_time}Z`);
-    const endAt = ev.all_day
-      ? new Date(`${ymd(occEnd)}T23:59:59Z`)
-      : new Date(`${ymd(occEnd)}T${ev.end_time}Z`);
-    out.push({
-      event_id: ev.id,
-      start_at: startAt.toISOString(),
-      end_at: endAt.toISOString(),
-      all_day: ev.all_day,
-    });
-    if (ev.recurrence === "monthly") {
-      cursor = new Date(cursor);
-      cursor.setUTCMonth(cursor.getUTCMonth() + 1);
-    } else {
-      cursor = new Date(cursor.getTime() + stepDays * dayMs);
-    }
-    safety++;
-  }
-  return out;
-}
-
-function ymd(d: Date) {
-  return d.toISOString().slice(0, 10);
-}
 
 function json(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), {

@@ -5,6 +5,7 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { z } from "npm:zod@3.23.8";
 import { corsHeaders } from "../_shared/cors.ts";
+import { buildOccurrences } from "../_shared/occurrences.ts";
 import { sendMail } from "../_shared/email.ts";
 import { getSiteUrl } from "../_shared/site-url.ts";
 import { newToken, hashToken } from "../_shared/tokens.ts";
@@ -18,7 +19,7 @@ type ManagedEvent = {
   all_day: boolean;
   start_time: string | null;
   end_time: string | null;
-  recurrence: "none" | "weekly" | "biweekly" | "monthly";
+  recurrence: "none" | "weekly" | "biweekly" | "monthly" | "monthly_by_weekday";
   recurrence_until: string | null;
 };
 
@@ -108,61 +109,14 @@ async function materializeOccurrences(
   supabase: ReturnType<typeof createClient>,
   event: ManagedEvent,
 ) {
-  // Clear any existing occurrences first
+  // Clear any existing occurrences first, then rebuild from the shared generator
+  // (nth-weekday monthly, America/New_York wall-clock times).
   await supabase.from("event_occurrences").delete().eq("event_id", event.id);
-
-  const startDate = new Date(`${event.start_date}T00:00:00Z`);
-  const endDate = new Date(`${event.end_date}T00:00:00Z`);
-  const dayMs = 24 * 60 * 60 * 1000;
-  const spanDays = Math.round((endDate.getTime() - startDate.getTime()) / dayMs);
-
-  const buildOccurrence = (occStart: Date) => {
-    const occEnd = new Date(occStart.getTime() + spanDays * dayMs);
-    let startAt: Date;
-    let endAt: Date;
-    if (event.all_day) {
-      startAt = new Date(`${ymd(occStart)}T00:00:00Z`);
-      endAt = new Date(`${ymd(occEnd)}T23:59:59Z`);
-    } else {
-      startAt = new Date(`${ymd(occStart)}T${event.start_time}Z`);
-      endAt = new Date(`${ymd(occEnd)}T${event.end_time}Z`);
-    }
-    return {
-      event_id: event.id,
-      start_at: startAt.toISOString(),
-      end_at: endAt.toISOString(),
-      all_day: event.all_day,
-    };
-  };
-
-  const occurrences: ReturnType<typeof buildOccurrence>[] = [];
-  if (event.recurrence === "none") {
-    occurrences.push(buildOccurrence(startDate));
-  } else {
-    const until = new Date(`${event.recurrence_until}T00:00:00Z`);
-    const stepDays =
-      event.recurrence === "weekly" ? 7 : event.recurrence === "biweekly" ? 14 : 0;
-    let cursor = new Date(startDate);
-    let safety = 0;
-    while (cursor <= until && safety < 400) {
-      occurrences.push(buildOccurrence(cursor));
-      if (event.recurrence === "monthly") {
-        cursor = new Date(cursor);
-        cursor.setUTCMonth(cursor.getUTCMonth() + 1);
-      } else {
-        cursor = new Date(cursor.getTime() + stepDays * dayMs);
-      }
-      safety++;
-    }
-  }
-
+  const occurrences = buildOccurrences(event);
   if (occurrences.length) {
-    await supabase.from("event_occurrences").insert(occurrences);
+    const { error } = await supabase.from("event_occurrences").insert(occurrences);
+    if (error) console.error("occurrence_insert_failed", { event_id: event.id });
   }
-}
-
-function ymd(d: Date): string {
-  return d.toISOString().slice(0, 10);
 }
 
 function json(payload: unknown, status = 200) {

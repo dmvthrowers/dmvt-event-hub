@@ -5,6 +5,7 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { z } from "npm:zod@3.23.8";
 import { corsHeaders } from "../_shared/cors.ts";
+import { normalizeRecurrence } from "../_shared/occurrences.ts";
 import { sendMail } from "../_shared/email.ts";
 import { getSiteUrl } from "../_shared/site-url.ts";
 import { newToken, slugify } from "../_shared/tokens.ts";
@@ -33,7 +34,10 @@ const EventSchema = z.object({
   all_day: z.boolean(),
   start_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/).optional().nullable(),
   end_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/).optional().nullable(),
-  recurrence: z.enum(["none", "weekly", "biweekly", "monthly"]),
+  // "monthly" is the legacy form value; the DB enum is monthly_by_weekday.
+  recurrence: z
+    .enum(["none", "weekly", "biweekly", "monthly", "monthly_by_weekday"])
+    .transform(normalizeRecurrence),
   recurrence_until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   is_free: z.boolean(),
   cost_amount: z.number().min(0).max(100000).optional().nullable(),

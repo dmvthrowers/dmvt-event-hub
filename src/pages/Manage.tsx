@@ -43,12 +43,12 @@ export const ManagePage = () => {
       return;
     }
     (async () => {
-      const url = `https://gjthxhfnyigvihywibca.supabase.co/functions/v1/manage-event?token=${encodeURIComponent(token)}`;
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-event?token=${encodeURIComponent(token)}`;
       const res = await fetch(url);
       const data = (await res.json()) as LoadEventResponse;
       if (!res.ok || data?.error) {
         setError(data?.error === "invalid_token" ? "This management link is invalid or revoked." : "Couldn't load event.");
-      } else {
+      } else if (data.event) {
         setEvent(data.event);
       }
       setLoading(false);
@@ -104,7 +104,7 @@ export const ManagePage = () => {
       return;
     }
     toast({ title: "Event cancelled" });
-    setEvent((e) => (e ? { ...e, status: "cancelled" } : e));
+    setEvent((e) => (e ? { ...e, status: "hidden" } : e));
   };
 
   if (loading) {
@@ -139,7 +139,7 @@ export const ManagePage = () => {
         <h1 className="mt-2 text-4xl text-navy md:text-5xl">{event.title}</h1>
         <p className="mt-3 text-muted-foreground">
           Status:{" "}
-          <span className="font-semibold uppercase text-navy">{event.status}</span>
+          <span className="font-semibold uppercase text-navy">{event.status === "hidden" ? "cancelled" : event.status}</span>
         </p>
 
         <div className="mt-8 space-y-5 border border-hairline bg-white p-6 md:p-8">
