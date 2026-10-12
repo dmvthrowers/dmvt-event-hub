@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      statuses: write   # the Notify Vercel step posts a commit status
 
     steps:
       - name: Checkout
