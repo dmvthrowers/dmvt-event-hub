@@ -27,14 +27,14 @@ supabase/migrations/       real, dated SQL migrations -- read the newest few bef
 supabase/functions/        edge functions: submit-event, verify-event, manage-event, renew-event,
                             daily-maintenance (cron), report-event, admin-action, geocode, feeds,
                             feed-subscribe, manage-feed-subscription, sitemap, service-status
-supabase/functions/_shared/email-stub.ts   ALL email currently goes through this stub logger --
-                            not wired to a real provider yet, see README's "Swapping the email
-                            stub" section for the Resend-shaped replacement
-skills/                    8 *.SKILL.md files -- api-health-monitoring, automated-testing-data-
-                            seeding, content-compliance-privacy, entry-moderation-review,
-                            location-data-management, map-visualization-analytics, translation-
-                            localization, user-feedback-triage. Read the relevant one before
-                            touching that area -- they're real operational guidance, not filler.
+supabase/functions/_shared/email.ts        transactional email via Resend (RESEND_API_KEY secret);
+                            email-stub.ts is a leftover no function imports
+supabase/functions/_shared/occurrences.ts  the ONE occurrence generator (nth-weekday monthly,
+                            New York wall-clock -> UTC); tested in src/test/occurrences.test.ts
+supabase/seed.sql           local/staging seed data, tagged 'seed', dates relative to today
+skills/                    *.SKILL.md files. automated-testing-data-seeding is current and specific
+                            to this repo; most of the others are generic stubs copied from the map
+                            repo, so verify against the code before trusting them.
 .lovable/plan.md            original Lovable build plan, historical
 ```
 
@@ -43,9 +43,10 @@ skills/                    8 *.SKILL.md files -- api-health-monitoring, automate
 - **A real `.env` file exists in this repo** (not just `.env.example`) — `.gitignore` correctly
   excludes `.env`/`.env.local`/`.env.*.local`, so it's not tracked, but be careful with any tool
   or command that might read/echo/upload the working tree wholesale.
-- **Email sending is currently a stub** (`email-stub.ts` just logs) — don't assume
-  submit-event/verify-event/renew-event actually deliver mail in the current deployment unless
-  you've confirmed the stub was swapped for a real provider.
+- **Email goes through Resend** (`_shared/email.ts`). It only delivers if the
+  `RESEND_API_KEY` function secret is set on the Supabase project.
+- **Times are America/New_York wall-clock.** Never append `Z` to `start_time`; use
+  `buildOccurrences` from `_shared/occurrences.ts`.
 - **`bootstrap_first_admin()` is intentionally a no-op once any admin exists** and isn't exposed
   to signed-in users via RPC — this is a deliberate one-time-bootstrap security boundary, not a
   bug if it "stops working" after the first admin is created.
@@ -63,9 +64,10 @@ skills/                    8 *.SKILL.md files -- api-health-monitoring, automate
 bun install
 bun run dev            # local dev server
 bun run lint
-bun run test           # vitest
+bun run typecheck
+bun run test           # vitest (see skills/automated-testing-data-seeding.SKILL.md)
 bun run build
 ```
 
-No local Supabase check-in here — schema/RLS/edge-function correctness needs a real (or linked)
-Supabase project; there's no offline mock layer evident in this repo.
+`supabase db reset` applies migrations and `supabase/seed.sql` locally. RLS and edge-function
+behavior still needs a real (or linked) Supabase project.

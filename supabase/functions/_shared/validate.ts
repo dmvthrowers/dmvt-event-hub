@@ -5,7 +5,7 @@ import { z } from "npm:zod@3.23.8";
 // .min(N) checks while being stored or logged differently by different systems.
 export const stripControls = z.string().transform((s) =>
   // deno-lint-ignore no-control-regex
-  s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+  s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "") // eslint-disable-line no-control-regex
 );
 
 // Convenience: string with control chars stripped, then trimmed.

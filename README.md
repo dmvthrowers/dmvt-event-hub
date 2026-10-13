@@ -29,7 +29,7 @@ VITE_SUPABASE_PROJECT_ID=
 - **Backend:** Supabase (auth, Postgres + RLS, edge functions, cron via `pg_cron` + `pg_net`).
 - **Maps:** Leaflet + OpenStreetMap (no API key).
 - **Geocoding:** Nominatim with caching.
-- **Email:** stub logger (`supabase/functions/_shared/email-stub.ts`) — swap for Resend/Postmark when self-hosting.
+- **Email:** Resend via `supabase/functions/_shared/email.ts` (set the `RESEND_API_KEY` function secret). `email-stub.ts` is an unused leftover.
 
 ### Key tables
 

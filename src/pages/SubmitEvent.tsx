@@ -36,7 +36,7 @@ type FormState = {
   all_day: boolean;
   start_time: string;
   end_time: string;
-  recurrence: "none" | "weekly" | "biweekly" | "monthly";
+  recurrence: "none" | "weekly" | "biweekly" | "monthly_by_weekday";
   recurrence_until: string;
   is_free: boolean;
   cost_amount: string;
@@ -407,7 +407,7 @@ export const SubmitPage = () => {
                     <SelectItem value="none">One-time</SelectItem>
                     <SelectItem value="weekly">Weekly</SelectItem>
                     <SelectItem value="biweekly">Every 2 weeks</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="monthly_by_weekday">Monthly (same weekday, e.g. 3rd Sunday)</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>

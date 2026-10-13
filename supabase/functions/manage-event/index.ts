@@ -9,6 +9,7 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { z } from "npm:zod@3.23.8";
 import { corsHeaders } from "../_shared/cors.ts";
+import { buildOccurrences } from "../_shared/occurrences.ts";
 import { safeString } from "../_shared/validate.ts";
 import { hashToken } from "../_shared/tokens.ts";
 
@@ -41,7 +42,7 @@ type ManagedEvent = {
   all_day: boolean;
   start_time: string | null;
   end_time: string | null;
-  recurrence: "none" | "weekly" | "biweekly" | "monthly";
+  recurrence: "none" | "weekly" | "biweekly" | "monthly" | "monthly_by_weekday";
   recurrence_until: string | null;
 };
 
@@ -74,7 +75,13 @@ Deno.serve(async (req) => {
   if (!event) return json({ error: "invalid_token" }, 404);
 
   if (body.action === "cancel") {
-    await supabase.from("events").update({ status: "cancelled" }).eq("id", event.id);
+    // event_status has no "cancelled" value; "hidden" takes the event off every public
+    // view and out of daily-maintenance's re-materialize query (status = 'published').
+    const { error: cancelErr } = await supabase
+      .from("events")
+      .update({ status: "hidden" })
+      .eq("id", event.id);
+    if (cancelErr) return json({ error: "cancel_failed", message: cancelErr.message }, 400);
     await supabase.from("event_occurrences").delete().eq("event_id", event.id);
     return json({ ok: true, status: "cancelled" });
   }
@@ -126,44 +133,11 @@ async function rebuildOccurrences(
   event: ManagedEvent,
 ) {
   await supabase.from("event_occurrences").delete().eq("event_id", event.id);
-  const dayMs = 24 * 60 * 60 * 1000;
-  const startDate = new Date(`${event.start_date}T00:00:00Z`);
-  const endDate = new Date(`${event.end_date}T00:00:00Z`);
-  const spanDays = Math.round((endDate.getTime() - startDate.getTime()) / dayMs);
-  const ymd = (d: Date) => d.toISOString().slice(0, 10);
-  const build = (occStart: Date) => {
-    const occEnd = new Date(occStart.getTime() + spanDays * dayMs);
-    const startAt = event.all_day
-      ? new Date(`${ymd(occStart)}T00:00:00Z`)
-      : new Date(`${ymd(occStart)}T${event.start_time}Z`);
-    const endAt = event.all_day
-      ? new Date(`${ymd(occEnd)}T23:59:59Z`)
-      : new Date(`${ymd(occEnd)}T${event.end_time}Z`);
-    return {
-      event_id: event.id,
-      start_at: startAt.toISOString(),
-      end_at: endAt.toISOString(),
-      all_day: event.all_day,
-    };
-  };
-  const occs: ReturnType<typeof build>[] = [];
-  if (event.recurrence === "none") {
-    occs.push(build(startDate));
-  } else {
-    const until = new Date(`${event.recurrence_until}T00:00:00Z`);
-    const step = event.recurrence === "weekly" ? 7 : event.recurrence === "biweekly" ? 14 : 0;
-    let cur = new Date(startDate);
-    let i = 0;
-    while (cur <= until && i < 400) {
-      occs.push(build(cur));
-      if (event.recurrence === "monthly") {
-        cur = new Date(cur);
-        cur.setUTCMonth(cur.getUTCMonth() + 1);
-      } else cur = new Date(cur.getTime() + step * dayMs);
-      i++;
-    }
+  const occs = buildOccurrences(event);
+  if (occs.length) {
+    const { error } = await supabase.from("event_occurrences").insert(occs);
+    if (error) console.error("occurrence_insert_failed", { event_id: event.id });
   }
-  if (occs.length) await supabase.from("event_occurrences").insert(occs);
 }
 
 function json(payload: unknown, status = 200) {

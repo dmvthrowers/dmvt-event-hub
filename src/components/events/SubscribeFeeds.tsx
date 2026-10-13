@@ -328,8 +328,9 @@ const PersonalLinkBlock = ({
     });
     const payload = (data ?? null) as FeedSubscribeResponse | FeedSubscribeError | null;
     setLoading(false);
-    if (error || payload?.error) {
-      setError(payload?.error || "Could not create link");
+    const payloadError = payload && "error" in payload ? payload.error : undefined;
+    if (error || payloadError) {
+      setError(payloadError || "Could not create link");
       return;
     }
     if (

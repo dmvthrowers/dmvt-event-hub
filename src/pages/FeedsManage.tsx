@@ -57,8 +57,9 @@ export const FeedsManagePage = () => {
       );
       const payload = (data ?? null) as ManageListResponse | ManageFeedError | null;
       setLoading(false);
-      if (error || payload?.error) {
-        setError(payload?.error || "Could not load subscriptions");
+      const payloadError = payload && "error" in payload ? payload.error : undefined;
+      if (error || payloadError) {
+        setError(payloadError || "Could not load subscriptions");
         return;
       }
       if (payload && "email" in payload && "subscriptions" in payload) {
