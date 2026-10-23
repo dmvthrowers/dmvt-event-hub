@@ -7,7 +7,7 @@
 //   POST { token, action: "update", patch: {...allowed fields} }
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { z } from "npm:zod@3.23.8";
+import { z } from "npm:zod@4.6.6";
 import { corsHeaders } from "../_shared/cors.ts";
 import { buildOccurrences } from "../_shared/occurrences.ts";
 import { safeString } from "../_shared/validate.ts";

@@ -5,7 +5,7 @@
 // reminder so the next pre-expiry window will email again.
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { z } from "npm:zod@3.23.8";
+import { z } from "npm:zod@4.6.6";
 import { corsHeaders } from "../_shared/cors.ts";
 import { hashToken } from "../_shared/tokens.ts";
 

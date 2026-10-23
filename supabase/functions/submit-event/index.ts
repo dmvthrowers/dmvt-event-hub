@@ -3,7 +3,7 @@
 // issues a verification token, and sends the verification email (stubbed).
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { z } from "npm:zod@3.23.8";
+import { z } from "npm:zod@4.6.6";
 import { corsHeaders } from "../_shared/cors.ts";
 import { normalizeRecurrence } from "../_shared/occurrences.ts";
 import { sendMail } from "../_shared/email.ts";

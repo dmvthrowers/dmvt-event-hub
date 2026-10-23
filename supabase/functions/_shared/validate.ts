@@ -1,4 +1,4 @@
-import { z } from "npm:zod@3.23.8";
+import { z } from "npm:zod@4.6.6";
 
 // Strips ASCII control characters (null bytes, BEL, ESC, etc.) from strings
 // before Zod validates them. Without this, crafted inputs with \x00 can pass

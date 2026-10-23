@@ -3,7 +3,7 @@
 // -> { token, ics_url, webcal_url, rss_url, manage_url }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { z } from "npm:zod@3.23.8";
+import { z } from "npm:zod@4.6.6";
 import { newToken } from "../_shared/tokens.ts";
 import { sendMail } from "../_shared/email.ts";
 import { getSiteUrl } from "../_shared/site-url.ts";
