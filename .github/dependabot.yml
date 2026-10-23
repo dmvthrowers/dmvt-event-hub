@@ -1,12 +1,39 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
 version: 2
+
 updates:
-  - package-ecosystem: "" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  # Group non-breaking npm updates into one prod PR + one dev PR; majors stay
+  # individual so they're reviewed on their own.
+  - package-ecosystem: npm
+    directory: /
     schedule:
-      interval: "weekly"
- 
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+    groups:
+      npm-prod:
+        dependency-type: production
+        update-types:
+          - patch
+          - minor
+      npm-dev:
+        dependency-type: development
+        update-types:
+          - patch
+          - minor
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
+    groups:
+      patch-and-minor:
+        update-types:
+          - patch
+          - minor
