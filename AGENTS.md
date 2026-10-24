@@ -69,5 +69,10 @@ bun run test           # vitest (see skills/automated-testing-data-seeding.SKILL
 bun run build
 ```
 
+TypeScript is installed twice on purpose: `tsc` (what `typecheck` runs) is TypeScript 7
+(`@typescript/native`), and the `typescript` package is the TypeScript 6 API
+(`@typescript/typescript6`) for typescript-eslint and editors. TypeScript 7.0 has no API yet; drop
+the alias once typescript-eslint supports 7.x.
+
 `supabase db reset` applies migrations and `supabase/seed.sql` locally. RLS and edge-function
 behavior still needs a real (or linked) Supabase project.
