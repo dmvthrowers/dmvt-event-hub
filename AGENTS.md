@@ -40,9 +40,9 @@ skills/                    *.SKILL.md files. automated-testing-data-seeding is c
 
 ## Gotchas
 
-- **A real `.env` file exists in this repo** (not just `.env.example`) — `.gitignore` correctly
-  excludes `.env`/`.env.local`/`.env.*.local`, so it's not tracked, but be careful with any tool
-  or command that might read/echo/upload the working tree wholesale.
+- **`.env` is local only.** `.gitignore` excludes `.env`/`.env.local`/`.env.*.local`; copy
+  `.env.example` and fill it in. Be careful with any tool or command that might read, echo or
+  upload the working tree wholesale.
 - **Email goes through Resend** (`_shared/email.ts`). It only delivers if the
   `RESEND_API_KEY` function secret is set on the Supabase project.
 - **Times are America/New_York wall-clock.** Never append `Z` to `start_time`; use
