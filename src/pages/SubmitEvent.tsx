@@ -473,7 +473,7 @@ export const SubmitPage = () => {
               </Field>
 
               {/* Honeypot — visually hidden */}
-              <div aria-hidden="true" className="absolute -left-[9999px]">
+              <div aria-hidden="true" className="absolute left-[-9999px]">
                 <Label htmlFor="website">Website</Label>
                 <Input
                   id="website"
@@ -529,9 +529,12 @@ const Field = ({
   children: React.ReactNode;
 }) => (
   <div className="space-y-2">
-    <Label className="text-sm font-semibold uppercase tracking-wider text-navy">
-      {label} {required && <span className="text-red">*</span>}
-    </Label>
+    {/* The wrapper keeps the label's line box at the parent's line-height, as in Tailwind 3. */}
+    <div>
+      <Label className="text-sm font-semibold uppercase tracking-wider text-navy">
+        {label} {required && <span className="text-red">*</span>}
+      </Label>
+    </div>
     {children}
     {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
   </div>

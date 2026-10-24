@@ -18,7 +18,7 @@ export const SubscribePage = () => {
               { label: "Events", to: "/events" },
               { label: "Subscribe" },
             ]}
-            className="!text-cream/70 [&_a]:!text-cream/70 [&_a:hover]:!text-cream [&_span.text-navy]:!text-cream"
+            className="text-cream/70! [&_a]:text-cream/70! [&_a:hover]:text-cream! [&_span.text-navy]:text-cream!"
           />
           <p className="label-caps mt-4 text-red">Subscribe</p>
           <h1 className="mt-3 font-display text-4xl text-cream md:text-5xl">

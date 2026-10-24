@@ -198,7 +198,7 @@ export const FeedsManagePage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="flex-1 border border-hairline bg-cream px-4 py-2.5 text-navy outline-none focus:border-red"
+                className="flex-1 border border-hairline bg-cream px-4 py-2.5 text-navy outline-hidden focus:border-red"
               />
               <button
                 type="submit"

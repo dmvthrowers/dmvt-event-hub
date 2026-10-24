@@ -15,11 +15,11 @@ export const AboutPage = () => {
       <section className="relative bg-navy text-cream">
         <div
           aria-hidden
-          className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(hsl(var(--cream))_1px,transparent_1px)] [background-size:22px_22px]"
+          className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(hsl(var(--cream))_1px,transparent_1px)] bg-size-[22px_22px]"
         />
         <div className="container-dmvt relative section-pad text-center">
           <p className="label-caps text-red">About YoYo Events</p>
-          <h1 className="mx-auto mt-6 max-w-3xl text-4xl leading-[1.05] md:text-6xl">
+          <h1 className="mx-auto mt-6 max-w-3xl text-4xl leading-[1.05] md:text-6xl md:leading-none">
             A Calendar Built By <span className="text-red">Throwers</span>, For Throwers.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-base text-cream/80 md:text-lg">
