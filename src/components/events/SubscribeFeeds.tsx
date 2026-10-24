@@ -378,7 +378,7 @@ const PersonalLinkBlock = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="border border-hairline bg-cream px-3 py-2 text-navy outline-none focus:border-red"
+                className="border border-hairline bg-cream px-3 py-2 text-navy outline-hidden focus:border-red"
               />
               <input
                 type="text"
@@ -386,7 +386,7 @@ const PersonalLinkBlock = ({
                 onChange={(e) => setLabel(e.target.value)}
                 placeholder="Label (optional, e.g. Work laptop)"
                 maxLength={120}
-                className="border border-hairline bg-cream px-3 py-2 text-navy outline-none focus:border-red"
+                className="border border-hairline bg-cream px-3 py-2 text-navy outline-hidden focus:border-red"
               />
               <button
                 type="submit"

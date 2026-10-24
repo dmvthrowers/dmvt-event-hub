@@ -26,11 +26,11 @@ const Home = () => {
       <section className="relative bg-navy text-cream">
         <div
           aria-hidden
-          className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(hsl(var(--cream))_1px,transparent_1px)] [background-size:22px_22px]"
+          className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(hsl(var(--cream))_1px,transparent_1px)] bg-size-[22px_22px]"
         />
         <div className="container-dmvt relative section-pad text-center">
           <p className="label-caps text-red">Yo-Yos · Kendama · Skill Toys</p>
-          <h1 className="mx-auto mt-6 max-w-3xl text-5xl leading-[1.05] md:text-7xl">
+          <h1 className="mx-auto mt-6 max-w-3xl text-5xl leading-[1.05] md:text-7xl md:leading-none">
             Find Your People.
             <br />
             <span className="text-red">Throw Together.</span>
@@ -140,7 +140,7 @@ const Home = () => {
       <section className="relative bg-navy text-cream">
         <div
           aria-hidden
-          className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(hsl(var(--cream))_1px,transparent_1px)] [background-size:22px_22px]"
+          className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(hsl(var(--cream))_1px,transparent_1px)] bg-size-[22px_22px]"
         />
         <div className="container-dmvt relative section-pad">
           <div className="grid gap-10 md:grid-cols-2 md:items-center">

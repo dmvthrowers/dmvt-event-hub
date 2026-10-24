@@ -53,7 +53,7 @@ export const SiteNav = () => {
       </div>
 
       {/* Main nav */}
-      <div className="border-b border-hairline/60 bg-cream/95 backdrop-blur supports-[backdrop-filter]:bg-cream/80">
+      <div className="border-b border-hairline/60 bg-cream/95 backdrop-blur-sm supports-backdrop-filter:bg-cream/80">
         <div className="container-dmvt flex h-16 items-center justify-between">
           <Link
             to="/"
@@ -75,7 +75,7 @@ export const SiteNav = () => {
                   cn(
                     "label-caps relative text-navy transition-colors hover:text-red",
                     isActive &&
-                      "text-red after:absolute after:-bottom-[22px] after:left-0 after:h-[2px] after:w-full after:bg-red"
+                      "text-red after:absolute after:bottom-[-22px] after:left-0 after:h-[2px] after:w-full after:bg-red"
                   )
                 }
               >

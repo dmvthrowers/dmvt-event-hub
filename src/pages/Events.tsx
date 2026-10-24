@@ -92,7 +92,7 @@ export const EventsPage = () => {
 
       <section className="container-dmvt py-8 md:py-10">
         {/* Sticky filter + view controls so they stay reachable while scrolling */}
-        <div className="sticky top-16 z-30 -mx-4 bg-cream/95 px-4 pb-3 pt-3 backdrop-blur supports-[backdrop-filter]:bg-cream/85 md:mx-0 md:px-0">
+        <div className="sticky top-16 z-30 -mx-4 bg-cream/95 px-4 pb-3 pt-3 backdrop-blur-sm supports-backdrop-filter:bg-cream/85 md:mx-0 md:px-0">
           <FilterBar
             filters={filters}
             onChange={setFilters}

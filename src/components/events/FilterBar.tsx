@@ -58,7 +58,7 @@ export const FilterBar = ({ filters, onChange, resultCount }: FilterBarProps) =>
               type="button"
               onClick={() => onChange({ ...filters, search: "" })}
               aria-label="Clear search"
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-1 text-muted-foreground hover:text-navy focus:outline-none focus-visible:ring-2 focus-visible:ring-navy"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-1 text-muted-foreground hover:text-navy focus:outline-hidden focus-visible:ring-2 focus-visible:ring-navy"
             >
               <X className="h-4 w-4" />
             </button>
