@@ -42,7 +42,7 @@ export const SiteNav = () => {
             YoYo Map ↗
           </a>
           <a
-            href="https://dmvthrowers.club/vsyc26.html"
+            href="https://dmvthrowers.club/vsyc27.html"
             target="_blank"
             rel="noopener noreferrer"
             className="label-caps text-xs text-white/90 hover:text-white"
